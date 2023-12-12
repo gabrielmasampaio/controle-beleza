@@ -5,12 +5,10 @@ import {User} from "@nextui-org/user";
 import {Tooltip} from "@nextui-org/tooltip";
 import {DeleteIcon, EditIcon, EyeIcon} from "@nextui-org/shared-icons";
 import {Pagination} from "@nextui-org/pagination";
-import {columns, items} from "@/app/lib/data";
+import {columns, Item, items} from "@/app/lib/data";
 
 
 export default function AdminTable({className = ""}) {
-
-  type Item = typeof items[0]
 
   const renderCell = React.useCallback((item: Item, columnKey: React.Key) => {
     const cellValue = item[columnKey as keyof Item];
@@ -79,7 +77,7 @@ export default function AdminTable({className = ""}) {
                     isCompact
                     showControls
                     showShadow
-                    color="secondary"
+                    color="primary"
                     page={page}
                     total={pages}
                     onChange={(page) => setPage(page)}
