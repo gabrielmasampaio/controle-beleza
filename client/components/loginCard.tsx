@@ -5,24 +5,27 @@ import {Link} from "@nextui-org/link";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {Input} from "@nextui-org/input";
 import React from "react";
+import {credentials} from "@/app/lib/data";
 
 
 
-export default function LoginCard({className = ""}) {
+export default function LoginCard({className = "", onLoginSuccess = ()=>{}}) {
 
   const [mail, setMail] = React.useState("");
   const [password, setPassword] = React.useState("");
-
+  const [failedAttempt, setFailedAttempt] = React.useState(false)
   const submit = () => {
-    if(mail == "" || password == ""){
-      return
+    if(mail == credentials.username || password == credentials.password){
+      setFailedAttempt(false)
+      onLoginSuccess()
+    } else {
+      console.log("failedAttempt", failedAttempt)
+      setFailedAttempt(true)
     }
-    console.log("Login/Email: " + mail);
-    console.log("Password: " + password);
   }
 
   return (
-      <div className={className}>
+      <div className={className} >
         <Card className="min-h-[300px]">
           <CardHeader className="flex gap-3">
             <div className="flex flex-col justify-start items-start">
@@ -34,6 +37,7 @@ export default function LoginCard({className = ""}) {
           <CardBody className="gap-3 px-5">
             <Input size="sm" type="email" label="E-mail" value={mail} onValueChange={setMail}/>
             <Input size="sm" type="password" label="Senha" value={password} onValueChange={setPassword}/>
+            <div hidden={!failedAttempt} className="text-xs text-red-600">*Credenciais inválidas</div>
           </CardBody>
           <Divider/>
           <CardFooter>

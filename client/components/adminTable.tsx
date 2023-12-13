@@ -1,4 +1,5 @@
 'use client';
+
 import React from "react";
 import {Table, TableBody, TableCell, TableColumn, TableHeader, TableRow} from "@nextui-org/table";
 import {User} from "@nextui-org/user";
@@ -6,9 +7,15 @@ import {Tooltip} from "@nextui-org/tooltip";
 import {DeleteIcon, EditIcon, EyeIcon} from "@nextui-org/shared-icons";
 import {Pagination} from "@nextui-org/pagination";
 import {columns, Item, items} from "@/app/lib/data";
+import {ProductModal} from "@/components/productModal";
+import {useDisclosure} from "@nextui-org/use-disclosure";
 
 
 export default function AdminTable({className = ""}) {
+
+  const [seeOnly, setSeeOnly] = React.useState(false);
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const [selectedItem, setSelectedItem] = React.useState<Item | undefined>(undefined);
 
   const renderCell = React.useCallback((item: Item, columnKey: React.Key) => {
     const cellValue = item[columnKey as keyof Item];
@@ -34,12 +41,22 @@ export default function AdminTable({className = ""}) {
         return (
             <div className="relative flex items-center gap-2">
               <Tooltip content="Visualizar">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                    onClick={() => {
+                      setSeeOnly(true)
+                      setSelectedItem(item)
+                      onOpen()
+                    }}>
                 <EyeIcon />
               </span>
               </Tooltip>
               <Tooltip content="Editar Produto">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50"
+                    onClick={() => {
+                      setSeeOnly(false)
+                      setSelectedItem(item)
+                      onOpen()
+                    }}>
                 <EditIcon />
               </span>
               </Tooltip>
@@ -94,11 +111,13 @@ export default function AdminTable({className = ""}) {
           <TableBody items={tableItems}>
             {(tableItem) => (
                 <TableRow key={tableItem.id}>
-                  {(columnKey) => <TableCell>{renderCell(tableItem, columnKey)}</TableCell>}
+                  {(columnKey) => <TableCell>{renderCell(tableItem, columnKey)}
+                  </TableCell>}
                 </TableRow>
             )}
           </TableBody>
         </Table>
+        <ProductModal seeOnly={seeOnly} isOpen={isOpen} onOpenChange={onOpenChange} product={selectedItem ?? undefined} />
       </div>
   )
 }

@@ -4,6 +4,11 @@ export const columns = [
   {name: "AÇÕES", uid: "actions"},
 ];
 
+export const credentials = {
+  username: "magna",
+  password: "12345",
+}
+
 export const items =
     [
       {

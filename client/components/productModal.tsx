@@ -96,7 +96,7 @@ return(
                     <ModalContent>
                       {(onClose) => (
                           <>
-                            <ModalHeader className="flex flex-col gap-1">Modal Title</ModalHeader>
+                            <ModalHeader className="flex flex-col gap-1">Editar Produto</ModalHeader>
                             <ModalBody>
                               <p>
                                 No seeOnly modal
