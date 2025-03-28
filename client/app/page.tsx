@@ -9,13 +9,13 @@ export default function Home() {
 				<h1 className={title()}>Produtos&nbsp;a </h1>
 				<br />
 				<h1 className={title()}>
-					<p className={title({ color: "green" })}>Pronta Entrega</p>
+					<p className={title({ color: "pink" })}>Pronta Entrega</p>
 				</h1>
 				<h2 className={subtitle({ class: "mt-4" })}>
-					Veja os produtos em nosso catálogo
+					Escolha os produtos no catálogo
 				</h2>
 				<h2 className={subtitle({ class: "mt-[-0.8rem]" })}>
-					Entre em contato para consultar disponibilidade
+					Entre em contato com a consultora
 				</h2>
 			</div>
 
@@ -27,7 +27,7 @@ export default function Home() {
 					Catálogo
 				</Link>
 				<Link
-					className={buttonStyles({ variant: "bordered", radius: "full" })}
+					className={buttonStyles({ color: "success", variant: "bordered", radius: "full"})}
 					href="/contact"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">

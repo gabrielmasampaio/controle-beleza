@@ -9,6 +9,7 @@ export default function ContactPage() {
 			<div className={"mt-20"}><p className={subtitle()}>Clique no botão para fazer seu pedido via whatsapp </p></div>
 			<Link
 					className={buttonStyles({ color: "primary", radius: "full", variant: "shadow" })}
+					isExternal={true}
 					href="https://api.whatsapp.com/send?phone=5561985951534&text=Ol%C3%A1,%20gostaria%20de%20fazer%20o%20pedido%20de%20alguns%20produtos%20que%20vi%20no%20seu%20cat%C3%A1logo%20online"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
@@ -19,8 +20,8 @@ export default function ContactPage() {
 				</svg>
 				Whatsapp
 			</Link>
-			<div className={"mt-10"}> <p>Ou ligue no número</p> </div>
-			<h1 className={title({ color: "green" })}>61 98595-1534</h1>
+			<div className={"mt-10"}> <p>Ou ligue para</p> </div>
+			<h1 className={title({ color: "pink" })}>61 98595-1534</h1>
 		</div>
 	);
 }

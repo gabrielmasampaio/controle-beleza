@@ -6,7 +6,7 @@ export default function CataloguePage() {
 		<div>
 			<h1 className={title()}>Catálogo de <br/></h1>
 			<h1 className={title()}>
-				<p className={title({ color: "green" })}>Produtos</p>
+				<p className={title({ color: "pink" })}>Produtos</p>
 			</h1>
 			<ProductGrid />
 		</div>

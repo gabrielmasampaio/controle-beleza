@@ -16,7 +16,7 @@ export default function AdminPage() {
 					: <>
 						<h1 className={title()}>Painel de </h1>
 						<h1 className={title()}>
-							<p className={title({ color: "green" })}>Admin</p>
+							<p className={title({ color: "pink" })}>Admin</p>
 						</h1>
 						<AdminTable className={"mt-7"} />
 					</>

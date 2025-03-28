@@ -31,15 +31,16 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head />
+			<head ><title> Controle Beleza </title></head>
 			<body
 				className={clsx(
-					"min-h-screen bg-background font-sans antialiased",
-					fontSans.variable
+					"min-h-screen bg-background bg-scroll font-sans antialiased",
+					fontSans.variable,
+					"bg-pink-radial dark:bg-pink-radial-dark",
 				)}
 			>
-				<Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
-					<div className="relative flex flex-col h-screen">
+				<Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+					<div className="relative flex flex-col min-h-screen">
 						<Navbar />
 						<main className="container mx-auto max-w-7xl pt-16 px-6 flex-grow">
 							{children}
