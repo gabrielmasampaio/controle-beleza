@@ -9,6 +9,7 @@ interface ShoppingListContextType {
     removeItem: (id: number) => void;
     updateQuantity: (id: number, quantity: number) => void;
     clearList: () => void;
+    sumListValue: () => number;
 }
 
 export const ShoppingListContext = createContext<ShoppingListContextType | null>(null);
@@ -42,15 +43,21 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
     };
 
     const updateQuantity = (id: number, quantity: number) => {
-        setItems((prev) => prev.map((item) => item.id === id ? { ...item, quantity } : item));
+        if(quantity === 0) removeItem(id)
+        else
+            setItems((prev) => prev.map((item) => item.id === id ? { ...item, quantity } : item));
     };
 
     const clearList = () => {
         setItems([]);
     };
 
+    const sumListValue = () => {
+        return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    }
+
     return (
-        <ShoppingListContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearList }}>
+        <ShoppingListContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearList, sumListValue }}>
             {children}
         </ShoppingListContext.Provider>
     );
