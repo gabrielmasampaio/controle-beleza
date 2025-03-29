@@ -1,3 +1,5 @@
+"use client";
+
 import { title, subtitle } from "@/components/primitives";
 import { button as buttonStyles } from "@nextui-org/theme";
 import { Link } from "@nextui-org/link";
@@ -17,8 +19,8 @@ export default function ShoppingListPage() {
             <div className="mt-10 space-y-4">
                 {items.length === 0 ? (
                     <>
-                        <p className="text-default-500">Sua lista está vazia no momento.</p>
-                        <p className="text-default-500">
+                        <p>Sua lista está vazia no momento.</p>
+                        <p>
                             Ir para o
                             <Link
                                 href="/catalogue"
