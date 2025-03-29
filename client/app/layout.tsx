@@ -31,7 +31,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head ><title> Controle Beleza </title></head>
+			<head ><title> Revenda Online </title></head>
 			<body
 				className={clsx(
 					"min-h-screen bg-background bg-scroll font-sans antialiased",

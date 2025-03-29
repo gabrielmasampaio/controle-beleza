@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-    name: "Controle Beleza",
+    name: "Revenda Online",
     description: "Realce sua beleza com nossos produtos.",
     navItems: [
         {
@@ -11,6 +11,10 @@ export const siteConfig = {
         {
             label: "Contato",
             href: "/contact",
+        },
+        {
+            label: "Lista",
+            href: "/shopping-list",
         },
     ],
 };

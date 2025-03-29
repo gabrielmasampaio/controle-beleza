@@ -1,4 +1,4 @@
-import {
+ import {
 	Navbar as NextUINavbar,
 	NavbarContent,
 	NavbarMenu,
@@ -24,8 +24,8 @@ export const Navbar = () => {
 			<NavbarContent className="basis-1/5 sm:basis-full" justify="start">
 				<NavbarBrand as="li" className="gap-3 max-w-fit">
 					<NextLink className="flex justify-start items-center gap-1" href="/">
-						<h3 className={title({size: "xsm"})}>Controle</h3>
-						<h3 className={title({ color: "pink", size: "xsm" })}>Beleza&nbsp;</h3>
+						<h3 className={title({size: "xsm"})}>Revenda</h3>
+						<h3 className={title({ color: "pink", size: "xsm" })}>Online&nbsp;</h3>
 					</NextLink>
 				</NavbarBrand>
 				<ul className="hidden lg:flex md:flex gap-4 justify-start ml-2">
