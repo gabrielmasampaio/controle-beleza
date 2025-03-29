@@ -51,7 +51,7 @@ export const Navbar = () => {
                 <NavbarMenuToggle className="lg:hidden md:hidden"/>
             </NavbarContent>
 
-            <NavbarMenu>
+            <NavbarMenu className="max-h-[20%] bg-transparent">
                 <div className="mx-4 mt-2 flex flex-col gap-2">
                     {siteConfig.navItems.map((item, index) => (
                         <NavbarMenuItem key={`${item}-${index}`}>
