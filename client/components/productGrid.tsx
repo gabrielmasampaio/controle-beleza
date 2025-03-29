@@ -48,7 +48,7 @@ export default function ProductGrid() {
               </CardBody>
               <CardFooter className="text-small justify-between">
                 <b>{item.name}</b>
-                <p className="text-default-500 whitespace-nowrap">R${formatPrice(item.price)}</p>
+                <p className="text-default-500 whitespace-nowrap">{formatPrice(item.price)}</p>
               </CardFooter>
             </Card>
         ))}
