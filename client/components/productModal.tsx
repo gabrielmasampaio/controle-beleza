@@ -40,8 +40,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                     <>
                         <ModalHeader className="flex flex-col gap-1">{product.name}</ModalHeader>
                         <ModalBody>
-                            <div className="flex min-w-full min-h-full">
-                                <div className="w-8/12">
+                            <div className="flex flex-col sm:flex-row min-w-full min-h-full gap-4">
+                                <div className="w-full sm:w-8/12">
                                     <Image
                                         shadow="sm"
                                         radius="lg"
@@ -52,20 +52,29 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                     />
                                 </div>
 
-                                <div className="flex flex-col w-4/12 ml-5 justify-evenly">
-                                    <Card className="min-w-full min-h-full">
-                                        <CardBody>
-                                            <span>{product.description}</span>
-                                        </CardBody>
-                                        <Divider/>
-                                        <CardFooter className="min-w-full justify-center">
-                                            <Code color="primary" className="w-fit text-end self-center">
-                                                {formatPrice(product?.price)}
-                                            </Code>
-                                        </CardFooter>
-                                    </Card>
-
-
+                                <div className="flex flex-col w-full sm:w-4/12 justify-evenly">
+                                    {!product.description
+                                        ?
+                                        <Card className="min-w-full min-h-full">
+                                            <CardBody>
+                                                <Code color="primary" className="w-fit text-end self-center">
+                                                    {formatPrice(product.price)}
+                                                </Code>
+                                            </CardBody>
+                                        </Card>
+                                        :
+                                        <Card className="min-w-full min-h-full">
+                                            <CardBody>
+                                                <span>{product.description}</span>
+                                            </CardBody>
+                                            <Divider/>
+                                            <CardFooter className="min-w-full justify-center">
+                                                <Code color="primary" className="w-fit text-end self-center">
+                                                    {formatPrice(product.price)}
+                                                </Code>
+                                            </CardFooter>
+                                        </Card>
+                                    }
                                 </div>
                             </div>
                         </ModalBody>
