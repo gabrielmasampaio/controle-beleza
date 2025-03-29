@@ -7,6 +7,7 @@ import React from "react";
 import {Image} from "@nextui-org/image";
 import {formatPrice} from "@/app/lib/text-format";
 import {useShoppingList} from "@/app/lib/shopping-list/useShoppingList";
+import {Code} from "@nextui-org/code";
 
 
 interface ProductModalProps {
@@ -54,28 +55,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({seeOnly, product, isO
                                         <div className="flex flex-col w-4/12 ml-5 justify-between">
                                             <div>
                                                 {product.name}
-                                                <p> Preço <br/> <p
-                                                    className="text-sm"> R${formatPrice(product.price)} </p></p>
-                                            </div>
-                                            <br/>
-                                            <div className="text-xs">
-                                                *Consulte a disponibilidade do produto via whatsapp clicando no botão
-                                                abaixo.
+                                                <Code> {formatPrice(product?.price)} </Code>
+                                                <div className="text-xs">
+                                                    *Consulte a disponibilidade do produto via whatsapp clicando no botão
+                                                    abaixo.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                 </ModalBody>
                                 <ModalFooter>
-                                    <Button color="danger" variant="light" onPress={onClose}>
-                                        Fechar
-                                    </Button>
                                     <Button
                                         color="success"
                                         variant="flat"
                                         onPress={() => {
                                             handleAddToList();
-                                            onClose(); // fecha modal após adicionar
+                                            onClose();
                                         }}
                                     >
                                         Adicionar à Lista

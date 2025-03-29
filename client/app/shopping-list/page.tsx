@@ -7,6 +7,7 @@ import {Card, CardBody} from "@nextui-org/card";
 import {Code} from "@nextui-org/code";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {Link} from "@nextui-org/link";
+import {formatPrice} from "@/app/lib/text-format";
 
 export default function ShoppingListPage() {
     const {items, updateQuantity, removeItem, sumListValue} = useShoppingList();
@@ -25,7 +26,7 @@ export default function ShoppingListPage() {
                             <span>Total: </span>
                         </div>
                         <div className="text-end">
-                            <Code>{sumListValue().toLocaleString("pt-BR", {style: "currency", currency: "BRL"})} </Code>
+                            <Code>{formatPrice(sumListValue())} </Code>
                         </div>
                     </div>
                 </CardBody>

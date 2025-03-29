@@ -3,12 +3,11 @@ export const formatPrice = (price) => {
 
   // Check if the input is a valid number
   if (isNaN(numericPrice)) {
-    return "Invalid Price";
+    console.error("Invalid value provided")
+    return "N/A";
   }
 
   // Use toFixed(2) to round the number to 2 decimal places and convert it to a string
-  const formattedPrice = numericPrice.toFixed(2);
+  return numericPrice.toLocaleString("pt-BR", {style: "currency", currency: "BRL"})
 
-  // Replace '.' with ',' to match the desired format
-  return formattedPrice.replace(".", ",");
 }
