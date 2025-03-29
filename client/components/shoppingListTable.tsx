@@ -5,7 +5,7 @@ import {
     TableColumn,
     TableBody,
     TableRow,
-    TableCell, Avatar,
+    TableCell,
 } from "@nextui-org/react";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {ShoppingItem} from "@/types";
@@ -111,7 +111,7 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                     ))}
                 </TableBody>
             </Table>
-            <ProductModal seeOnly={true} product={selectedItem} isOpen={isProductOpen} onOpenChange={onProductOpenChange}/>
+            <ProductModal hideFooter={true} product={selectedItem} isOpen={isProductOpen} onOpenChange={onProductOpenChange}/>
             <RemoveItemModal  isOpen={isRemoveItemOpen} item={selectedItem} onOpenChange={onRemoveItemOpenChange} onConfirmRemoval={removeItem}/>
         </div>
     );
