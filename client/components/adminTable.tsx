@@ -12,6 +12,8 @@ import {Item} from "@/types";
 import {formatPrice} from "@/app/lib/text-format";
 import {ProductFormModal} from "@/components/ProductFormModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
+import {Input} from "@nextui-org/input";
+import {SearchIcon} from "@/components/icons";
 
 interface AdminTableProps {
     className?: string;
@@ -31,11 +33,19 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     const [page, setPage] = React.useState(1);
     const rowsPerPage = 8;
     const pages = Math.ceil(items.length / rowsPerPage);
+    const [searchTerm, setSearchTerm] = React.useState("");
+
+    const filteredItems = React.useMemo(() => {
+        return items.filter((item) =>
+            item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [items, searchTerm]);
+
 
     const pageItems = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
-        return items.slice(start, start + rowsPerPage);
-    }, [page, items]);
+        return filteredItems.slice(start, start + rowsPerPage);
+    }, [page, filteredItems]);
 
     useEffect(() => {
         setItems(mockItems); // substituir por chamada real
@@ -66,6 +76,18 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
     return (
         <div className={`flex flex-col gap-3 ${className}`}>
+            <div className="flex justify-between items-center px-2">
+                <Input
+                    size="sm"
+                    isClearable
+                    className="max-w-[200px]"
+                    label="Buscar"
+                    value={searchTerm}
+                    startContent={<SearchIcon size={5} />}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onClear={() => setSearchTerm("")}
+                />
+            </div>
             <Table
                 aria-label="Tabela de produtos"
                 bottomContent={
