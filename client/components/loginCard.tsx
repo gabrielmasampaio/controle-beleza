@@ -39,7 +39,7 @@ export default function LoginCard({className = "", onLoginSuccess = ()=>{}}) {
           </CardHeader>
           <Divider/>
           <CardBody className="gap-3 px-5">
-            <Input size="sm" type="email" label="E-username" value={username} onValueChange={setUsername}/>
+            <Input size="sm" type="name" label="Nome de usuario" value={username} onValueChange={setUsername}/>
             <Input size="sm" type="password" label="Senha" value={password} onValueChange={setPassword}/>
             <div hidden={!failedAttempt} className="text-xs text-red-600">*Credenciais inválidas</div>
           </CardBody>
