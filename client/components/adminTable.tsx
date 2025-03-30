@@ -2,22 +2,16 @@
 
 import React, {useEffect} from "react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    User,
-    Tooltip,
-    Pagination,
+    Table, TableHeader, TableColumn, TableBody, TableRow,
+    TableCell, User, Tooltip, Pagination
 } from "@nextui-org/react";
 import {items as mockItems} from "@/app/lib/data";
 import {EyeIcon, EditIcon, DeleteIcon} from "@nextui-org/shared-icons";
-import {ProductModal} from "@/components/productModal";
 import {useDisclosure} from "@nextui-org/use-disclosure";
 import {Item} from "@/types";
 import {formatPrice} from "@/app/lib/text-format";
+import {ProductFormModal} from "@/components/ProductFormModal";
+import {RemoveItemModal} from "@/components/RemoveItemModal";
 
 interface AdminTableProps {
     className?: string;
@@ -26,6 +20,12 @@ interface AdminTableProps {
 export default function AdminTable({className = ""}: AdminTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<Item>(mockItems[0]);
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const {
+        isOpen: isRemoveItemOpen,
+        onOpen: onRemoveItemOpen,
+        onOpenChange: onRemoveItemOpenChange
+    } = useDisclosure();
+
     const [items, setItems] = React.useState<Item[]>([]);
 
     const [page, setPage] = React.useState(1);
@@ -38,8 +38,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     }, [page, items]);
 
     useEffect(() => {
-        // Substituir por chamada ao backend
-        setItems(mockItems);
+        setItems(mockItems); // substituir por chamada real
         setPage(1);
     }, []);
 
@@ -49,7 +48,20 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     };
 
     const handleDelete = (item: Item) => {
-        console.log("Deletar produto:", item.name);
+        setSelectedItem(item);
+        onRemoveItemOpen();
+    };
+
+    const onDeleteItem = async () => {
+        try {
+            console.log("Chamando API de delete para:", selectedItem?.id);
+            // await fetch(`/api/products/${selectedItem?.id}`, { method: 'DELETE' });
+
+            setItems(prev => prev.filter(i => i.id !== selectedItem?.id));
+            onRemoveItemOpenChange();
+        } catch (err) {
+            console.error("Erro ao deletar:", err);
+        }
     };
 
     return (
@@ -83,7 +95,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                         <TableRow key={item.id}>
                             <TableCell className="flex items-center gap-1">
                                 <Tooltip
-                                    className="cursor-pointer hover:opacity-10"
+                                    className="cursor-pointer"
                                     onClick={() => handleOpenProduct(item)}
                                     content={
                                         <div className="text-xs flex items-center gap-2">
@@ -131,10 +143,18 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 </TableBody>
             </Table>
 
-            <ProductModal
+            <ProductFormModal
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 product={selectedItem}
+                onSave={() => {}}
+            />
+
+            <RemoveItemModal
+                isOpen={isRemoveItemOpen}
+                item={selectedItem}
+                onOpenChange={onRemoveItemOpenChange}
+                onConfirmRemoval={onDeleteItem}
             />
         </div>
     );

@@ -16,6 +16,7 @@ import {User} from "@nextui-org/user";
 import {useDisclosure} from "@nextui-org/use-disclosure";
 import {ProductModal} from "@/components/productModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
+import {formatPrice} from "@/app/lib/text-format";
 
 interface ShoppingListTableProps {
     items: ShoppingItem[];
@@ -78,10 +79,12 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                             <TableCell
                                 className="flex items-center gap-1">
                                 <Tooltip
+                                    onClick={() => handleOpenProduct(item)}
+                                    className="cursor-pointer"
                                     content={<div className="text-xs relative flex items-center gap-2"><EyeIcon/> ver
                                         produto </div>}>
-                                    <User onClick={() => handleOpenProduct(item)}
-                                          className="cursor-pointer hover:opacity-50"
+                                    <User
+                                          className="hover:opacity-50"
                                           avatarProps={{radius: "lg", src: item.avatar}}
                                           name={item.name}
                                     >
@@ -89,7 +92,7 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                                     </User>
                                 </Tooltip>
                             </TableCell>
-                            <TableCell className="text-left">R$ {item.price.toFixed(2)}</TableCell>
+                            <TableCell className="text-left">{formatPrice(item.price)}</TableCell>
                             <TableCell>
                                 <div className="flex items-center justify-between gap-4 w-full">
                                     <div className="flex items-center gap-3 justify-center w-full">
