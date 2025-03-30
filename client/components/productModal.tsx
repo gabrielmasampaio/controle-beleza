@@ -12,6 +12,7 @@ import {Tooltip} from "@nextui-org/tooltip";
 import {Card, CardBody, CardFooter} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
 import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
+import toast from 'react-hot-toast';
 
 interface ProductModalProps {
     product: Item;
@@ -83,6 +84,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         variant="flat"
                                         onPress={() => {
                                             handleAddToList();
+                                            toast.success("Item adicionado à lista!");
                                             onClose();
                                         }}
                                     >
@@ -101,7 +103,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                 <></>
                             }
                         </ModalFooter>
-
                     </>
                 )}
             </ModalContent>

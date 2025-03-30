@@ -4,6 +4,7 @@ import {Image} from "@nextui-org/image";
 import React from "react";
 import {Button} from "@nextui-org/button";
 import {Tooltip} from "@nextui-org/tooltip";
+import toast from "react-hot-toast";
 
 
 interface RemoveItemModalProps {
@@ -43,6 +44,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                                 <Tooltip content="Remover item da lista">
                                     <Button color="danger" variant="light" onPress={() => {
                                         onConfirmRemoval(item.id);
+                                        toast.error("Item removido da lista!");
                                         OnClose();
                                         }}>
                                         Sim

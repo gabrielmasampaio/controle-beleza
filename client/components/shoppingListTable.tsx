@@ -17,7 +17,6 @@ import {useDisclosure} from "@nextui-org/use-disclosure";
 import {ProductModal} from "@/components/productModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
 
-
 interface ShoppingListTableProps {
     items: ShoppingItem[];
     addQuantityToItem: Function,
@@ -107,7 +106,9 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                                         <span>{item.quantity}</span>
                                         <span
                                             className="text-lg cursor-pointer active:opacity-50"
-                                            onClick={() => addQuantityToItem(item.id, item.quantity + 1)}
+                                            onClick={() => {
+                                                addQuantityToItem(item.id, item.quantity + 1)
+                                            }}
                                         >
                                             +
                                           </span>

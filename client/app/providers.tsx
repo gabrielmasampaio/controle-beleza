@@ -6,6 +6,7 @@ import {useRouter} from 'next/navigation'
 import {ThemeProvider as NextThemesProvider} from "next-themes";
 import {ThemeProviderProps} from "next-themes/dist/types";
 import {ShoppingListProvider} from "@/app/lib/shopping-list/ShoppingListProvider";
+import {Toaster} from "react-hot-toast";
 
 export interface ProvidersProps {
     children: React.ReactNode;
@@ -19,7 +20,8 @@ export function Providers({children, themeProps}: ProvidersProps) {
         <NextUIProvider navigate={router.push}>
             <NextThemesProvider {...themeProps}>
                 <ShoppingListProvider>
-                    {children}
+                    <Toaster position="bottom-right" toastOptions={{duration: 3000}} />
+                        {children}
                 </ShoppingListProvider>
             </NextThemesProvider>
         </NextUIProvider>
