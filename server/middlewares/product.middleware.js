@@ -16,7 +16,36 @@ function validateProduct(req, res, next) {
         return res.status(400).json({ message: 'Campo "storage" deve ser um inteiro positivo.' });
     }
 
-    next(); // dados válidos, segue para o controller
+    next();
 }
 
-module.exports = validateProduct;
+function validatePartialProduct(req, res, next) {
+    const { name, price, storage, image, description } = req.body;
+
+    if (price !== undefined && (typeof price !== 'number' || price < 0)) {
+        return res.status(400).json({ message: 'Campo "price" deve ser um número positivo.' });
+    }
+
+    if (storage !== undefined && (!Number.isInteger(storage) || storage < 0)) {
+        return res.status(400).json({ message: 'Campo "storage" deve ser um inteiro positivo.' });
+    }
+
+    if (name !== undefined && typeof name !== 'string') {
+        return res.status(400).json({ message: 'Campo "name" deve ser uma string.' });
+    }
+
+    if (description !== undefined && typeof description !== 'string') {
+        return res.status(400).json({ message: 'Campo "description" deve ser uma string.' });
+    }
+
+    if (image !== undefined && typeof image !== 'string') {
+        return res.status(400).json({ message: 'Campo "image" deve ser uma string (base64).' });
+    }
+
+    next();
+}
+
+module.exports = {
+    validateProduct,
+    validatePartialProduct,
+};

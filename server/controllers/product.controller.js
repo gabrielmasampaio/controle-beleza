@@ -22,6 +22,23 @@ async function createProduct(req, res) {
     }
 }
 
+/**
+ * Controller para fazer um update de um produto
+ */
+async function updateProduct(req, res) {
+    try {
+        const { id } = req.params;
+        const data = req.body;
+
+        const updated = await productService.updateProductById(id, data);
+        return res.status(200).json(updated);
+    } catch (error) {
+        console.error('Erro no update de produto:', error);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     createProduct,
+    updateProduct,
 };
