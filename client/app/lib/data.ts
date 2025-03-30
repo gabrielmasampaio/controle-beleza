@@ -1,3 +1,5 @@
+import {Item} from "@/types";
+
 export const columns = [
   {name: "PRODUTO", uid: "name"},
   {name: "PREÇO", uid: "price"},
@@ -9,7 +11,7 @@ export const credentials = {
   password: "12345",
 }
 
-export const items = [
+export const items: Item[] = [
     {
         id: 1,
         name: "Perfume",
@@ -151,6 +153,3 @@ export const items = [
         description: "Alta proteção contra os raios UVA/UVB, com fórmula leve e toque seco."
     }
 ];
-
-
-export type Item = typeof items[0];

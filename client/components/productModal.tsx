@@ -1,6 +1,6 @@
 'use client'
 
-import type {ShoppingItem} from "@/types";
+import type {Item} from "@/types";
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
 import {Button} from "@nextui-org/button";
 import React from "react";
@@ -13,7 +13,7 @@ import {Card, CardBody, CardFooter} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
 
 interface ProductModalProps {
-    product: ShoppingItem;
+    product: Item;
     isOpen: boolean;
     onOpenChange: any;
     hideFooter?: boolean;
@@ -28,9 +28,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
         }
     };
 
-    const contact = (product: ShoppingItem) => {
-        const url = `https://api.whatsapp.com/send?phone=5561985951534&text=Ol%C3%A1,%20gostaria%20de%20fazer%20o%20pedido%20desse%20produto%20que%20vi%20no%20seu%20cat%C3%A1logo%20online:%20${product.name}`;
-        window.open(url, "_blank");
+    const contact = (product: Item) => {
+        console.log("Mandar Item para compra", product)
+        // const url = `https://api.whatsapp.com/send?phone=5561985951534&text=Ol%C3%A1,%20gostaria%20de%20fazer%20o%20pedido%20desse%20produto%20que%20vi%20no%20seu%20cat%C3%A1logo%20online:%20${product.name}`;
+        // window.open(url, "_blank");
     };
 
     return (
