@@ -132,40 +132,49 @@ export default function ProductGrid() {
             {pageProducts ?
                 <>
                     <div id="grid" className="gap-4 grid grid-cols-2 sm:grid-cols-4">
-                        {pageProducts.map((product, index) => (
-                            <Card shadow="sm" key={product._id ?? index} isPressable
-                                  onPress={() => handleOpen(product)}>
-                                <CardBody className="overflow-visible p-0">
-                                    <Image
-                                        shadow="sm"
-                                        radius="lg"
-                                        width="100%"
-                                        alt={product.name}
-                                        className="w-full object-cover h-[180px]"
-                                        src={product.image ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
-                                    />
-                                </CardBody>
-                                <CardFooter className="text-small justify-between flex flex-col">
-                                    <b>{product.name}</b>
-                                    <p className="text-default-500 whitespace-nowrap">{formatPrice(product.price)}</p>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                        {pageProducts.length === 0 ? (
+                            <div className="col-span-full text-center text-default-500 text-sm">
+                                Nenhum produto encontrado.
+                            </div>
+                        ) : (
+                            pageProducts.map((product, index) => (
+                                <Card shadow="sm" key={product._id ?? index} isPressable
+                                      onPress={() => handleOpen(product)}>
+                                    <CardBody className="overflow-visible p-0">
+                                        <Image
+                                            shadow="sm"
+                                            radius="lg"
+                                            width="100%"
+                                            alt={product.name}
+                                            className="w-full object-cover h-[180px]"
+                                            src={product.image ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
+                                        />
+                                    </CardBody>
+                                    <CardFooter className="text-small justify-between flex flex-col">
+                                        <b>{product.name}</b>
+                                        <p className="text-default-500 whitespace-nowrap">{formatPrice(product.price)}</p>
+                                    </CardFooter>
+                                </Card>
+                            )))
+                        }
+
                     </div>
                     <div className="flex justify-center mt-6">
-                        <Pagination
-                            isCompact
-                            showControls
-                            showShadow
-                            color="primary"
-                            page={page}
-                            total={pages}
-                            onChange={(page) => {
-                                const grid = document.getElementById("grid");
-                                if (grid) grid.scrollIntoView({behavior: "smooth"});
-                                setPage(page);
-                            }}
-                        />
+                        {pageProducts.length > 0 &&
+                            <Pagination
+                                isCompact
+                                showControls
+                                showShadow
+                                color="primary"
+                                page={page}
+                                total={pages}
+                                onChange={(page) => {
+                                    const grid = document.getElementById("grid");
+                                    if (grid) grid.scrollIntoView({behavior: "smooth"});
+                                    setPage(page);
+                                }}
+                            />
+                        }
                     </div>
                     {selectedItem && <ProductModal product={selectedItem} isOpen={isOpen} onOpenChange={onOpenChange}/>}
                 </>
