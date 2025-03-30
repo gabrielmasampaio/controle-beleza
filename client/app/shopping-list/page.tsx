@@ -8,6 +8,7 @@ import {Code} from "@nextui-org/code";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {Link} from "@nextui-org/link";
 import {formatPrice} from "@/app/lib/text-format";
+import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 
 export default function ShoppingListPage() {
     const {items, updateQuantity, removeItem, sumListValue} = useShoppingList();
@@ -32,9 +33,10 @@ export default function ShoppingListPage() {
                 </CardBody>
             </Card>
             <Link
+                onClick={() => console.log("Criar um metodo aqui que sera colocado dentro da lib para montar a url com os items selecionados para enviar para o whatsapp. usar no href")}
                 className={buttonStyles({color: "secondary", radius: "full", variant: "shadow"})}
                 isExternal={true}
-                href="https://api.whatsapp.com/send?phone=5561985951534&text=Ol%C3%A1,%20gostaria%20de%20fazer%20o%20pedido%20de%20alguns%20produtos%20que%20vi%20no%20seu%20cat%C3%A1logo%20online"
+                href={buildWhatsappUrl(items)}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
                     <path fill="currentColor"
