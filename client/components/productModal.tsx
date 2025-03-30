@@ -11,6 +11,7 @@ import {Code} from "@nextui-org/code";
 import {Tooltip} from "@nextui-org/tooltip";
 import {Card, CardBody, CardFooter} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
+import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 
 interface ProductModalProps {
     product: Item;
@@ -26,12 +27,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
         if (product) {
             addItem({...product, quantity: 1});
         }
-    };
-
-    const contact = (product: Item) => {
-        console.log("Mandar Item para compra", product)
-        // const url = `https://api.whatsapp.com/send?phone=5561985951534&text=Ol%C3%A1,%20gostaria%20de%20fazer%20o%20pedido%20desse%20produto%20que%20vi%20no%20seu%20cat%C3%A1logo%20online:%20${product.name}`;
-        // window.open(url, "_blank");
     };
 
     return (
@@ -94,7 +89,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         Adicionar à Lista
                                     </Button>
                                     <Tooltip content="Pedir este item via whatsapp">
-                                        <Button color="primary" onPress={() => contact(product)}>
+                                        <Button color="primary" onPress={() =>{
+                                            const url = buildWhatsappUrl([{ ...product, quantity: 1 }]);
+                                            window.open(url, "_blank");
+                                        }}>
                                             Pedir agora
                                         </Button>
                                     </Tooltip>
