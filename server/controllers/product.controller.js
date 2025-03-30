@@ -52,9 +52,22 @@ async function getProducts(req, res) {
     }
 }
 
+async function getProductById(req, res) {
+    try {
+        const { id } = req.params;
+
+        const product = await productService.getProductById(id);
+        return res.status(200).json(product);
+    } catch (error) {
+        console.error('Erro ao buscar produto por ID:', error.message);
+        return res.status(404).json({ message: error.message });
+    }
+}
+
 
 module.exports = {
     createProduct,
     updateProduct,
-    getProducts
+    getProducts,
+    getProductById
 };
