@@ -5,8 +5,8 @@ import {Link} from "@nextui-org/link";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {Input} from "@nextui-org/input";
 import React from "react";
-import {credentials} from "@/app/lib/data";
-
+import {login} from "@/app/lib/api";
+import {saveToken} from "@/app/lib/auth";
 
 
 export default function LoginCard({className = "", onLoginSuccess = ()=>{}}) {
@@ -14,15 +14,19 @@ export default function LoginCard({className = "", onLoginSuccess = ()=>{}}) {
   const [mail, setMail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [failedAttempt, setFailedAttempt] = React.useState(false)
-  const submit = () => {
-    if(mail == credentials.username || password == credentials.password){
-      setFailedAttempt(false)
-      onLoginSuccess()
-    } else {
-      console.log("failedAttempt", failedAttempt)
-      setFailedAttempt(true)
+
+  const submit = async () => {
+    try {
+      const result = await login({ email: mail, password });
+      saveToken(result.token)
+      setFailedAttempt(false);
+      onLoginSuccess();
+    } catch (err) {
+      console.error(err);
+      setFailedAttempt(true);
     }
-  }
+  };
+
 
   return (
       <div className={className} >
