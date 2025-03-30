@@ -35,7 +35,19 @@ function validatePartialUser(req, res, next) {
     next();
 }
 
+function validateUserQuery(req, res, next) {
+    const { username } = req.query;
+
+    if (username !== undefined && typeof username !== 'string') {
+        return res.status(400).json({ message: '"username" deve ser uma string.' });
+    }
+
+    next();
+}
+
+
 module.exports = {
     validateUser,
-    validatePartialUser
+    validatePartialUser,
+    validateUserQuery
 };

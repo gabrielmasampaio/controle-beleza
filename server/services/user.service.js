@@ -61,9 +61,26 @@ async function updateUserById(id, data) {
     }
 }
 
+/**
+ * Retorna usuários com filtros opcionais (por enquanto: apenas username)
+ * Sempre ignora usuários marcados como isDeleted: true
+ */
+async function getAllUsers(filters) {
+    try {
+        const query = { isDeleted: false };
 
+        if (filters.username) {
+            query.username = { $regex: filters.username, $options: 'i' };
+        }
+
+        return await User.find(query).select('-password');
+    } catch (error) {
+        throw new Error('Erro ao buscar usuários: ' + error.message);
+    }
+}
 
 module.exports = {
     createUser,
-    updateUserById
+    updateUserById,
+    getAllUsers
 };

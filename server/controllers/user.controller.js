@@ -39,7 +39,20 @@ async function updateUser(req, res) {
     }
 }
 
+async function getUsers(req, res) {
+    try {
+        const filters = req.query;
+        const users = await userService.getAllUsers(filters);
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error('Erro ao buscar usuários:', error.message);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
     createUser,
-    updateUser
+    updateUser,
+    getUsers
 };
