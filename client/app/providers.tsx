@@ -5,7 +5,7 @@ import {NextUIProvider} from "@nextui-org/system";
 import {useRouter} from 'next/navigation'
 import {ThemeProvider as NextThemesProvider} from "next-themes";
 import {ThemeProviderProps} from "next-themes/dist/types";
-import {ShoppingListProvider} from "@/app/lib/shopping-list/ShoppingListProvider";
+import {ShoppingListProvider} from "@/app/lib/localStorage/shopping-list/ShoppingListProvider";
 import {Toaster} from "react-hot-toast";
 
 export interface ProvidersProps {

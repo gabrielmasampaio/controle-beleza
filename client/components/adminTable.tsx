@@ -5,22 +5,22 @@ import {
     Table, TableHeader, TableColumn, TableBody, TableRow,
     TableCell, User, Tooltip, Pagination
 } from "@nextui-org/react";
-import {items as mockItems} from "@/app/lib/data";
 import {EyeIcon, EditIcon, DeleteIcon} from "@nextui-org/shared-icons";
 import {useDisclosure} from "@nextui-org/use-disclosure";
-import {Item} from "@/types";
+import {Product} from "@/types";
 import {formatPrice} from "@/app/lib/text-format";
 import {ProductFormModal} from "@/components/ProductFormModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
 import {Input} from "@nextui-org/input";
 import {SearchIcon} from "@/components/icons";
+import {getProducts} from "@/app/lib/api/product.api";
 
 interface AdminTableProps {
     className?: string;
 }
 
 export default function AdminTable({className = ""}: AdminTableProps) {
-    const [selectedItem, setSelectedItem] = React.useState<Item>(mockItems[0]);
+    const [selectedItem, setSelectedItem] = React.useState<Product>();
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const {
         isOpen: isRemoveItemOpen,
@@ -28,18 +28,18 @@ export default function AdminTable({className = ""}: AdminTableProps) {
         onOpenChange: onRemoveItemOpenChange
     } = useDisclosure();
 
-    const [items, setItems] = React.useState<Item[]>([]);
+    const [products, setProducts] = React.useState<Product[]>([]);
 
     const [page, setPage] = React.useState(1);
     const rowsPerPage = 8;
-    const pages = Math.ceil(items.length / rowsPerPage);
+    const pages = Math.ceil(products.length / rowsPerPage);
     const [searchTerm, setSearchTerm] = React.useState("");
 
     const filteredItems = React.useMemo(() => {
-        return items.filter((item) =>
+        return products.filter((item) =>
             item.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [items, searchTerm]);
+    }, [products, searchTerm]);
 
 
     const pageItems = React.useMemo(() => {
@@ -48,16 +48,25 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     }, [page, filteredItems]);
 
     useEffect(() => {
-        setItems(mockItems); // substituir por chamada real
-        setPage(1);
+        async function fetchProducts() {
+            try {
+                const produtos = await getProducts();
+                setProducts(produtos);
+                setPage(1);
+            } catch (err) {
+                console.error("Erro ao buscar produtos:", err);
+            }
+        }
+
+        fetchProducts();
     }, []);
 
-    const handleOpenProduct = (item: Item) => {
+    const handleOpenProduct = (item: Product) => {
         setSelectedItem(item);
         onOpen();
     };
 
-    const handleDelete = (item: Item) => {
+    const handleDelete = (item: Product) => {
         setSelectedItem(item);
         onRemoveItemOpen();
     };
@@ -67,7 +76,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
             console.log("Chamando API de delete para:", selectedItem?.id);
             // await fetch(`/api/products/${selectedItem?.id}`, { method: 'DELETE' });
 
-            setItems(prev => prev.filter(i => i.id !== selectedItem?.id));
+            setProducts(prev => prev.filter(i => i.id !== selectedItem?.id));
             onRemoveItemOpenChange();
         } catch (err) {
             console.error("Erro ao deletar:", err);
@@ -76,7 +85,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
     return (
         <div className={`flex flex-col gap-3 ${className}`}>
-            <div className="flex justify-between items-center px-2">
+            <div className="flex justify-between products-center px-2">
                 <Input
                     size="sm"
                     isClearable
@@ -115,12 +124,12 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 <TableBody emptyContent={"Nenhum produto encontrado."}>
                     {pageItems.map((item) => (
                         <TableRow key={item.id}>
-                            <TableCell className="flex items-center gap-1">
+                            <TableCell className="flex products-center gap-1">
                                 <Tooltip
                                     className="cursor-pointer"
                                     onClick={() => handleOpenProduct(item)}
                                     content={
-                                        <div className="text-xs flex items-center gap-2">
+                                        <div className="text-xs flex products-center gap-2">
                                             <EyeIcon/> ver produto
                                         </div>
                                     }
@@ -140,7 +149,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                             </TableCell>
 
                             <TableCell>
-                                <div className="flex items-center justify-center gap-4">
+                                <div className="flex products-center justify-center gap-4">
                                     <Tooltip content="Editar Produto">
 										<span
                                             className="text-lg cursor-pointer active:opacity-50"

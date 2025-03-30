@@ -6,7 +6,7 @@ import {button as buttonStyles} from "@nextui-org/theme";
 import {Input} from "@nextui-org/input";
 import React from "react";
 import {login} from "@/app/lib/api";
-import {saveToken} from "@/app/lib/auth";
+import {saveToken} from "@/app/lib/localStorage/auth";
 
 
 export default function LoginCard({className = "", onLoginSuccess = ()=>{}}) {

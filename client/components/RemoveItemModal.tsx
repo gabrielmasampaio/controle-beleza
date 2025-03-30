@@ -44,7 +44,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                                 <Tooltip content="Remover item da lista">
                                     <Button color="danger" variant="light" onPress={() => {
                                         onConfirmRemoval(item.id);
-                                        toast.error("Item removido da lista!");
+                                        toast.error("Product removido da lista!");
                                         OnClose();
                                         }}>
                                         Sim

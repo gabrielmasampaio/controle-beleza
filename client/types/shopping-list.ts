@@ -1,5 +1,5 @@
-import { Item } from "./item";
+import { Product } from "./product";
 
-export type ShoppingItem = Item & {
+export type ShoppingItem = Product & {
     quantity: number;
 };

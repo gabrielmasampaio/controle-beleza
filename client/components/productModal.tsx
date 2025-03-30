@@ -1,12 +1,12 @@
 'use client'
 
-import type {Item} from "@/types";
+import type {Product} from "@/types";
 import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
 import {Button} from "@nextui-org/button";
 import React from "react";
 import {Image} from "@nextui-org/image";
 import {formatPrice} from "@/app/lib/text-format";
-import {useShoppingList} from "@/app/lib/shopping-list/useShoppingList";
+import {useShoppingList} from "@/app/lib/localStorage/shopping-list/useShoppingList";
 import {Code} from "@nextui-org/code";
 import {Tooltip} from "@nextui-org/tooltip";
 import {Card, CardBody, CardFooter} from "@nextui-org/card";
@@ -15,7 +15,7 @@ import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 import toast from 'react-hot-toast';
 
 interface ProductModalProps {
-    product: Item;
+    product: Product;
     isOpen: boolean;
     onOpenChange: any;
     hideFooter?: boolean;
@@ -45,7 +45,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         width="100%"
                                         alt={product.name}
                                         className="w-full object-fit"
-                                        src={product.avatar ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
+                                        src={product.image ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
                                     />
                                 </div>
 
@@ -84,7 +84,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         variant="flat"
                                         onPress={() => {
                                             handleAddToList();
-                                            toast.success("Item adicionado à lista!");
+                                            toast.success("Product adicionado à lista!");
                                             onClose();
                                         }}
                                     >

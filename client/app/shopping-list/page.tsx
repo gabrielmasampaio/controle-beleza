@@ -1,7 +1,7 @@
 "use client";
 
 import {title, subtitle} from "@/components/primitives";
-import {useShoppingList} from "@/app/lib/shopping-list/useShoppingList";
+import {useShoppingList} from "@/app/lib/localStorage/shopping-list/useShoppingList";
 import ShoppingListTable from "@/components/shoppingListTable";
 import {Card, CardBody} from "@nextui-org/card";
 import {Code} from "@nextui-org/code";

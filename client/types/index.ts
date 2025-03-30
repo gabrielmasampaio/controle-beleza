@@ -4,5 +4,5 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
 
-export * from "./item";
+export * from "./product";
 export * from "./shopping-list";

@@ -6,14 +6,14 @@ import {
 } from "@nextui-org/modal";
 import {Button} from "@nextui-org/button";
 import {Input} from "@nextui-org/input";
-import {Item} from "@/types";
+import {Product} from "@/types";
 import {ProductModal} from "@/components/productModal";
 
 interface ProductFormModalProps {
     isOpen: boolean;
     onOpenChange: () => void;
-    product?: Item;
-    onSave: (item: Item) => void;
+    product?: Product;
+    onSave: (item: Product) => void;
 }
 
 export const ProductFormModal: React.FC<ProductFormModalProps> = ({
@@ -22,7 +22,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                                       product,
                                                                       onSave
                                                                   }) => {
-    const [form, setForm] = React.useState<Item>({
+    const [form, setForm] = React.useState<Product>({
         id: product?.id ?? Math.random(),
         name: product?.name ?? "",
         description: product?.description ?? "",
@@ -38,7 +38,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
     }, [product]);
 
-    const handleChange = (field: keyof Item, value: string) => {
+    const handleChange = (field: keyof Product, value: string) => {
         setForm((prev) => ({
             ...prev,
             [field]: field === "price" ? parseFloat(value) : value

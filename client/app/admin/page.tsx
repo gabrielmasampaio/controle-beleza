@@ -4,7 +4,7 @@ import LoginCard from "@/components/loginCard";
 import AdminTable from "@/components/adminTable";
 import {title} from "@/components/primitives";
 import React, {useEffect, useState} from "react";
-import {getToken} from "@/app/lib/auth";
+import {getToken} from "@/app/lib/localStorage/auth";
 import {Spinner} from "@nextui-org/react";
 
 
