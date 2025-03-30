@@ -95,10 +95,32 @@ async function getUserById(id) {
     }
 }
 
+/**
+ * Soft delete: marca o usuário como isDeleted = true
+ * @param {String} id
+ */
+async function deleteUserById(id) {
+    try {
+        const deleted = await User.findByIdAndUpdate(
+            id,
+            { isDeleted: true },
+            { new: true }
+        ).select('-password');
+
+        if (!deleted) {
+            throw new Error('Usuário não encontrado');
+        }
+
+        return deleted;
+    } catch (error) {
+        throw new Error('Erro ao deletar usuário: ' + error.message);
+    }
+}
 
 module.exports = {
     createUser,
     updateUserById,
     getAllUsers,
-    getUserById
+    getUserById,
+    deleteUserById
 };
