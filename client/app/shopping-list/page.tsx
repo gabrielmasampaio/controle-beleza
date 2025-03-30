@@ -37,6 +37,7 @@ export default function ShoppingListPage() {
                 className={buttonStyles({color: "secondary", radius: "full", variant: "shadow"})}
                 isExternal={true}
                 href={buildWhatsappUrl(items)}
+                isDisabled={items.length<1}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
                     <path fill="currentColor"
