@@ -45,7 +45,34 @@ function validatePartialProduct(req, res, next) {
     next();
 }
 
+function validateProductQuery(req, res, next) {
+    const { name, minPrice, maxPrice, minStorage, maxStorage } = req.query;
+
+    if (minPrice !== undefined && isNaN(parseFloat(minPrice))) {
+        return res.status(400).json({ message: '"minPrice" deve ser um número válido.' });
+    }
+
+    if (maxPrice !== undefined && isNaN(parseFloat(maxPrice))) {
+        return res.status(400).json({ message: '"maxPrice" deve ser um número válido.' });
+    }
+
+    if (minStorage !== undefined && !Number.isInteger(Number(minStorage))) {
+        return res.status(400).json({ message: '"minStorage" deve ser um inteiro válido.' });
+    }
+
+    if (maxStorage !== undefined && !Number.isInteger(Number(maxStorage))) {
+        return res.status(400).json({ message: '"maxStorage" deve ser um inteiro válido.' });
+    }
+
+    if (name !== undefined && typeof name !== 'string') {
+        return res.status(400).json({ message: '"name" deve ser uma string.' });
+    }
+
+    next();
+}
+
 module.exports = {
     validateProduct,
     validatePartialProduct,
+    validateProductQuery
 };

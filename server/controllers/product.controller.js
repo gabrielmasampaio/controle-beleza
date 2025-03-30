@@ -38,7 +38,23 @@ async function updateProduct(req, res) {
     }
 }
 
+/**
+ * Controller para buscar produtos a partir dos filtros dos query params
+ */
+async function getProducts(req, res) {
+    try {
+        const filters = req.query;
+        const products = await productService.getAllProducts(filters);
+        return res.status(200).json(products);
+    } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
     createProduct,
     updateProduct,
+    getProducts
 };

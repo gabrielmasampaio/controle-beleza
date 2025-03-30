@@ -40,7 +40,57 @@ async function updateProductById(id, data) {
     }
 }
 
+/**
+ * Retorna lista de produtos com filtros opcionais
+ */
+async function getAllProducts(filters) {
+    try {
+        const query = {};
+
+        if (filters.name) {
+            query.name = { $regex: filters.name, $options: 'i' };
+        }
+
+        if (filters.minPrice || filters.maxPrice) {
+            query.price = {};
+            if (filters.minPrice) query.price.$gte = parseFloat(filters.minPrice);
+            if (filters.maxPrice) query.price.$lte = parseFloat(filters.maxPrice);
+        }
+
+        if (filters.minStorage || filters.maxStorage) {
+            query.storage = {};
+            if (filters.minStorage) query.storage.$gte = parseInt(filters.minStorage);
+            if (filters.maxStorage) query.storage.$lte = parseInt(filters.maxStorage);
+        }
+
+        return await Product.find(query);
+    } catch (error) {
+        throw new Error('Erro ao buscar produtos: ' + error.message);
+    }
+}
+
+/**
+ * Busca um produto pelo ID
+ * @param {String} id - ID do produto
+ * @returns {Promise<Object>} - Produto encontrado ou null
+ */
+async function getProductById(id) {
+    try {
+        const product = await Product.findById(id);
+        if (!product) {
+            throw new Error('Produto não encontrado');
+        }
+        return product;
+    } catch (error) {
+        throw new Error('Erro ao buscar produto por ID: ' + error.message);
+    }
+}
+
+
+
 module.exports = {
     createProduct,
     updateProductById,
+    getAllProducts,
+    getProductById
 };
