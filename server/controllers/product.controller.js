@@ -64,10 +64,22 @@ async function getProductById(req, res) {
     }
 }
 
+async function deleteProduct(req, res) {
+    try {
+        const { id } = req.params;
+        const deleted = await productService.deleteProductById(id);
+        return res.status(200).json({ message: 'Produto removido com sucesso', deleted });
+    } catch (error) {
+        console.error('Erro ao deletar produto:', error.message);
+        return res.status(404).json({ message: error.message });
+    }
+}
+
 
 module.exports = {
     createProduct,
     updateProduct,
     getProducts,
-    getProductById
+    getProductById,
+    deleteProduct
 };

@@ -86,11 +86,27 @@ async function getProductById(id) {
     }
 }
 
+/**
+ * Remove um produto pelo ID
+ * @param {String} id - ID do produto
+ */
+async function deleteProductById(id) {
+    try {
+        const deleted = await Product.findByIdAndDelete(id);
+        if (!deleted) {
+            throw new Error('Produto não encontrado');
+        }
+        return deleted;
+    } catch (error) {
+        throw new Error('Erro ao deletar produto: ' + error.message);
+    }
+}
 
 
 module.exports = {
     createProduct,
     updateProductById,
     getAllProducts,
-    getProductById
+    getProductById,
+    deleteProductById
 };
