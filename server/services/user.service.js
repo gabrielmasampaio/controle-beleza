@@ -79,8 +79,26 @@ async function getAllUsers(filters) {
     }
 }
 
+/**
+ * Retorna um usuário pelo ID (se não estiver deletado)
+ * @param {String} id
+ */
+async function getUserById(id) {
+    try {
+        const user = await User.findOne({ _id: id, isDeleted: false }).select('-password');
+        if (!user) {
+            throw new Error('Usuário não encontrado');
+        }
+        return user;
+    } catch (error) {
+        throw new Error('Erro ao buscar usuário por ID: ' + error.message);
+    }
+}
+
+
 module.exports = {
     createUser,
     updateUserById,
-    getAllUsers
+    getAllUsers,
+    getUserById
 };

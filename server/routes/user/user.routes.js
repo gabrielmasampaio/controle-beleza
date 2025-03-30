@@ -7,5 +7,6 @@ const {validateUser, validatePartialUser, validateUserQuery} = require('../../mi
 router.post('/', validateUser, userController.createUser);
 router.put('/:id', validateMongoId, validatePartialUser, userController.updateUser);
 router.get('/', validateUserQuery, userController.getUsers);
+router.get('/:id', validateMongoId, userController.getUserById);
 
 module.exports = router;

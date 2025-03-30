@@ -50,9 +50,20 @@ async function getUsers(req, res) {
     }
 }
 
+async function getUserById(req, res) {
+    try {
+        const { id } = req.params;
+        const user = await userService.getUserById(id);
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error('Erro ao buscar usuário por ID:', error.message);
+        return res.status(404).json({ message: error.message });
+    }
+}
 
 module.exports = {
     createUser,
     updateUser,
-    getUsers
+    getUsers,
+    getUserById
 };
