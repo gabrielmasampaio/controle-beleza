@@ -1,16 +1,5 @@
 import {Item} from "@/types";
 
-export const columns = [
-  {name: "PRODUTO", uid: "name"},
-  {name: "PREÇO", uid: "price"},
-  {name: "AÇÕES", uid: "actions"},
-];
-
-export const credentials = {
-  username: "magna",
-  password: "12345",
-}
-
 export const items: Item[] = [
     {
         id: 1,
