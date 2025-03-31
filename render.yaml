@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: controle-beleza-api
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: sua-secret-aqui
+      - key: DB_USER
+        value: seu-usuario-mongodb
+      - key: DB_PASS
+        value: sua-senha-mongodb
+      - key: DB_HOST
+        value: cluster0.tzvdnci.mongodb.net
+      - key: DB_NAME
+        value: db_revenda_online
+      - key: DB_OPTIONS
+        value: "?retryWrites=true&w=majority&appName=Cluster0"
