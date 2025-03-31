@@ -20,7 +20,7 @@ export function Providers({children, themeProps}: ProvidersProps) {
         <NextUIProvider navigate={router.push}>
             <NextThemesProvider {...themeProps}>
                 <ShoppingListProvider>
-                    <Toaster position="bottom-right" toastOptions={{duration: 3000}} />
+                    <Toaster position="top-right" toastOptions={{duration: 3000}} />
                         {children}
                 </ShoppingListProvider>
             </NextThemesProvider>

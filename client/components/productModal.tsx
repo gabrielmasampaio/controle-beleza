@@ -85,7 +85,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         variant="flat"
                                         onPress={() => {
                                             handleAddToList();
-                                            toast.success("Product adicionado à lista!");
+                                            toast.success("Produto adicionado à lista!");
                                             onClose();
                                         }}
                                     >
