@@ -32,7 +32,7 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
         setItems((prev) => {
             const exists = prev.find((i) => i.id === item.id);
             if (exists) {
-                return prev.map((i) => i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i);
+                return prev.map((i) => i.id === item.id ? { ...i, quantity: i.storage + item.storage } : i);
             }
             return [...prev, item];
         });
@@ -53,7 +53,7 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
     };
 
     const sumListValue = () => {
-        return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        return items.reduce((acc, item) => acc + item.price * item.storage, 0);
     }
 
     return (

@@ -13,6 +13,7 @@ import {Card, CardBody, CardFooter} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
 import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 import toast from 'react-hot-toast';
+import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 interface ProductModalProps {
     product: Product;
@@ -45,7 +46,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         width="100%"
                                         alt={product.name}
                                         className="w-full object-fit"
-                                        src={product.image ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
+                                        src={product.image?.trim() || DEFAULT_IMAGE}
                                     />
                                 </div>
 

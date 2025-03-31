@@ -5,7 +5,7 @@ import {Link} from "@nextui-org/link";
 import {button as buttonStyles} from "@nextui-org/theme";
 import {Input} from "@nextui-org/input";
 import React from "react";
-import {login} from "@/app/lib/api";
+import {login} from "@/app/lib/api/auth";
 import {saveToken} from "@/app/lib/localStorage/auth";
 
 

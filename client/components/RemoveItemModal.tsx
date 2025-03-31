@@ -4,7 +4,7 @@ import {Image} from "@nextui-org/image";
 import React from "react";
 import {Button} from "@nextui-org/button";
 import {Tooltip} from "@nextui-org/tooltip";
-import toast from "react-hot-toast";
+import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 
 interface RemoveItemModalProps {
@@ -33,7 +33,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                                             width="100%"
                                             alt={item.name}
                                             className="w-full object-fit"
-                                            src={item.avatar ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}/>
+                                            src={item.image?.trim() || DEFAULT_IMAGE}/>
                                     </div>
                                     <div className="flex flex-col w-1/2 ml-5 justify-between">
                                         Tem certeza de que quer remover {item.name} da sua lista de compras?
@@ -43,10 +43,9 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                             <ModalFooter>
                                 <Tooltip content="Remover item da lista">
                                     <Button color="danger" variant="light" onPress={() => {
-                                        onConfirmRemoval(item.id);
-                                        toast.error("Product removido da lista!");
+                                        onConfirmRemoval(item._id);
                                         OnClose();
-                                        }}>
+                                    }}>
                                         Sim
                                     </Button>
                                 </Tooltip>
@@ -57,7 +56,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                                         OnClose();
                                     }}
                                 >
-                                   Não
+                                    Não
                                 </Button>
                             </ModalFooter>
                         </>

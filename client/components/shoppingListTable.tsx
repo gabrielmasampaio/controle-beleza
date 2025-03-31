@@ -17,6 +17,7 @@ import {useDisclosure} from "@nextui-org/use-disclosure";
 import {ProductModal} from "@/components/productModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
 import {formatPrice} from "@/app/lib/text-format";
+import toast from "react-hot-toast";
 
 interface ShoppingListTableProps {
     items: ShoppingItem[];
@@ -75,7 +76,7 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
 
                 <TableBody emptyContent={noItemsInList()}>
                     {items.map((item) => (
-                        <TableRow className="border-b-1 border-default" key={item.id}>
+                        <TableRow className="border-b-1 border-default" key={item._id}>
                             <TableCell
                                 className="flex items-center gap-1">
                                 <Tooltip
@@ -85,7 +86,7 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                                         produto </div>}>
                                     <User
                                           className="hover:opacity-50"
-                                          avatarProps={{radius: "lg", src: item.avatar}}
+                                          avatarProps={{radius: "lg", src: item.image}}
                                           name={item.name}
                                     >
                                         {item.name}
@@ -99,18 +100,18 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                                         <span
                                             className="text-lg cursor-pointer active:opacity-50"
                                             onClick={() =>
-                                                item.quantity === 1
+                                                item.storage === 1
                                                     ? handleRemoveProduct(item)
-                                                    : addQuantityToItem(item.id, item.quantity - 1)
+                                                    : addQuantityToItem(item._id, item.storage - 1)
                                             }
                                         >
                                         –
                                         </span>
-                                        <span>{item.quantity}</span>
+                                        <span>{item.storage}</span>
                                         <span
                                             className="text-lg cursor-pointer active:opacity-50"
                                             onClick={() => {
-                                                addQuantityToItem(item.id, item.quantity + 1)
+                                                addQuantityToItem(item._id, item.storage + 1)
                                             }}
                                         >
                                             +
@@ -133,7 +134,10 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
             <ProductModal hideFooter={true} product={selectedItem} isOpen={isProductOpen}
                           onOpenChange={onProductOpenChange}/>
             <RemoveItemModal isOpen={isRemoveItemOpen} item={selectedItem} onOpenChange={onRemoveItemOpenChange}
-                             onConfirmRemoval={removeItem}/>
+                             onConfirmRemoval={(itemId: string) => {
+                                 toast.error("Product removido da lista!");
+                                 removeItem(itemId)
+                             }}/>
         </div>
     );
 }

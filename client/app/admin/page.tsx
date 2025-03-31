@@ -6,6 +6,7 @@ import {title} from "@/components/primitives";
 import React, {useEffect, useState} from "react";
 import {getToken} from "@/app/lib/localStorage/auth";
 import {Spinner} from "@nextui-org/react";
+import {validateToken} from "@/app/lib/api/auth";
 
 
 export default function AdminPage() {
@@ -13,12 +14,15 @@ export default function AdminPage() {
 	const [logged, setLogged] = React.useState(false)
 	const [loading, setLoading] = useState(true);
 
+
 	useEffect(() => {
-		const token = getToken();
-		if (token) {
-			setLogged(true);
+		async function checkAuth() {
+			const isValid = await validateToken();
+			setLogged(isValid);
+			setLoading(false);
 		}
-		setLoading(false);
+
+		checkAuth();
 	}, []);
 
 	if (loading) {

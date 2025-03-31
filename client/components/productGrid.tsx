@@ -14,6 +14,7 @@ import {getProducts} from "@/app/lib/api/product.api";
 import {button as buttonStyles} from "@nextui-org/react";
 import {Link} from "@nextui-org/link";
 import {subtitle} from "@/components/primitives";
+import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 type SortKey = "default" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
@@ -147,7 +148,7 @@ export default function ProductGrid() {
                                             width="100%"
                                             alt={product.name}
                                             className="w-full object-cover h-[180px]"
-                                            src={product.image ?? "https://thumbs.dreamstime.com/b/set-care-beauty-products-skin-29817248.jpg"}
+                                            src={product.image?.trim() || DEFAULT_IMAGE}
                                         />
                                     </CardBody>
                                     <CardFooter className="text-small justify-between flex flex-col">

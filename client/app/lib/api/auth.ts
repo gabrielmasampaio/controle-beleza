@@ -1,4 +1,25 @@
-export const API_URL = "http://localhost:5000/api";
+import { API_URL } from "./config";
+import {getToken} from "../localStorage/auth";
+
+export async function validateToken(): Promise<boolean> {
+    const token = getToken();
+
+    if (!token) return false;
+
+    try {
+        const res = await fetch(`${API_URL}/auth/validate`, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        return res.ok;
+    } catch (err) {
+        console.error("Erro ao validar token:", err);
+        return false;
+    }
+}
 
 export interface LoginPayload {
     username: string;

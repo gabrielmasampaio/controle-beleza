@@ -13,7 +13,9 @@ import {ProductFormModal} from "@/components/ProductFormModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
 import {Input} from "@nextui-org/input";
 import {SearchIcon} from "@/components/icons";
-import {getProducts} from "@/app/lib/api/product.api";
+import {deleteProduct, getProducts} from "@/app/lib/api/product.api";
+import toast from "react-hot-toast";
+import {Button} from "@nextui-org/button";
 
 interface AdminTableProps {
     className?: string;
@@ -35,6 +37,8 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     const pages = Math.ceil(products.length / rowsPerPage);
     const [searchTerm, setSearchTerm] = React.useState("");
 
+    const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
+
     const filteredItems = React.useMemo(() => {
         return products.filter((item) =>
             item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -42,7 +46,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     }, [products, searchTerm]);
 
 
-    const pageItems = React.useMemo(() => {
+    const pageProducts = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
         return filteredItems.slice(start, start + rowsPerPage);
     }, [page, filteredItems]);
@@ -71,12 +75,18 @@ export default function AdminTable({className = ""}: AdminTableProps) {
         onRemoveItemOpen();
     };
 
-    const onDeleteItem = async () => {
+    const onDeleteItem = async (itemId: string) => {
         try {
-            console.log("Chamando API de delete para:", selectedItem?.id);
-            // await fetch(`/api/products/${selectedItem?.id}`, { method: 'DELETE' });
-
-            setProducts(prev => prev.filter(i => i.id !== selectedItem?.id));
+            deleteProduct(itemId)
+                .then((data) => {
+                    console.log(data)
+                    toast.success("Produto removido")
+                })
+                .catch((err) => {
+                    console.log("Error deleting product", err)
+                    toast.success("Erro ao deletar produto")
+                })
+            setProducts(prev => prev.filter(i => i._id !== selectedItem?._id));
             onRemoveItemOpenChange();
         } catch (err) {
             console.error("Erro ao deletar:", err);
@@ -85,17 +95,28 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
     return (
         <div className={`flex flex-col gap-3 ${className}`}>
-            <div className="flex justify-between products-center px-2">
+            <div className="flex justify-between items-center px-2 gap-2">
                 <Input
                     size="sm"
                     isClearable
                     className="max-w-[200px]"
                     label="Buscar"
                     value={searchTerm}
-                    startContent={<SearchIcon size={5} />}
+                    startContent={<SearchIcon size={5}/>}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onClear={() => setSearchTerm("")}
                 />
+                <Button
+                    color="secondary"
+                    className="min-h-full"
+                    startContent={<span className="text-lg font-bold mb-[2px]"> + </span>}
+                    onPress={() => {
+                        setSelectedItem(undefined);
+                        onOpen();
+                    }}
+                >
+                    Novo Produto
+                </Button>
             </div>
             <Table
                 aria-label="Tabela de produtos"
@@ -122,12 +143,13 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 </TableHeader>
 
                 <TableBody emptyContent={"Nenhum produto encontrado."}>
-                    {pageItems.map((item) => (
-                        <TableRow key={item.id}>
+                    {pageProducts.map((product) => (
+                        <TableRow key={product._id}
+                                  className={product._id === highlightedId ? "text-warning transition duration-75" : ""}>
                             <TableCell className="flex products-center gap-1">
                                 <Tooltip
                                     className="cursor-pointer"
-                                    onClick={() => handleOpenProduct(item)}
+                                    onClick={() => handleOpenProduct(product)}
                                     content={
                                         <div className="text-xs flex products-center gap-2">
                                             <EyeIcon/> ver produto
@@ -136,16 +158,16 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                                 >
                                     <User
                                         className="hover:opacity-50"
-                                        avatarProps={{radius: "lg", src: item.avatar}}
-                                        name={item.name}
+                                        avatarProps={{radius: "lg", src: product.image}}
+                                        name={product.name}
                                     >
-                                        {item.description}
+                                        {product.description}
                                     </User>
                                 </Tooltip>
                             </TableCell>
 
                             <TableCell className="text-left">
-                                {formatPrice(item.price)}
+                                {formatPrice(product.price)}
                             </TableCell>
 
                             <TableCell>
@@ -153,7 +175,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                                     <Tooltip content="Editar Produto">
 										<span
                                             className="text-lg cursor-pointer active:opacity-50"
-                                            onClick={() => handleOpenProduct(item)}
+                                            onClick={() => handleOpenProduct(product)}
                                         >
 											<EditIcon/>
 										</span>
@@ -161,7 +183,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
                                     <Tooltip color="danger" content="Remover Produto">
 										<span
-                                            onClick={() => handleDelete(item)}
+                                            onClick={() => handleDelete(product)}
                                             className="text-lg text-red-500 cursor-pointer active:opacity-50"
                                         >
 											<DeleteIcon/>
@@ -178,12 +200,29 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 product={selectedItem}
-                onSave={() => {}}
+                onSave={(savedProduct) => {
+                    setProducts((prev) => {
+                        const index = prev.findIndex((item) => item._id === savedProduct._id);
+
+                        setHighlightedId(savedProduct._id ?? null);
+                        setTimeout(() => setHighlightedId(null), 3000);
+
+                        if (index !== -1) {
+                            const updated = [...prev];
+                            updated[index] = savedProduct;
+                            return updated;
+                        } else {
+                            return [savedProduct, ...prev];
+                        }
+
+
+                    });
+                }}
             />
 
             <RemoveItemModal
                 isOpen={isRemoveItemOpen}
-                item={selectedItem}
+                item={selectedItem} //Change this to accept Product instead of Item
                 onOpenChange={onRemoveItemOpenChange}
                 onConfirmRemoval={onDeleteItem}
             />

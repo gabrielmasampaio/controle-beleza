@@ -8,6 +8,8 @@ import {Button} from "@nextui-org/button";
 import {Input} from "@nextui-org/input";
 import {Product} from "@/types";
 import {ProductModal} from "@/components/productModal";
+import {createProduct, updateProduct} from "@/app/lib/api/product.api";
+import toast from "react-hot-toast";
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -23,12 +25,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                                       onSave
                                                                   }) => {
     const [form, setForm] = React.useState<Product>({
-        id: product?.id ?? Math.random(),
+        _id: product?._id,
         name: product?.name ?? "",
         description: product?.description ?? "",
         price: product?.price ?? 0,
-        avatar: product?.avatar ?? "",
-    });
+        storage: product?.storage ?? 0,
+        image: product?.image ?? ""
+    })
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
@@ -45,9 +48,19 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }));
     };
 
-    const handleSave = () => {
-        onSave(form);
-        onOpenChange();
+    const handleSave = async () => {
+        try {
+            const saved = form._id
+                ? await updateProduct(form)
+                : await createProduct(form);
+
+            toast.success("Produto salvo com sucesso")
+            onSave(saved);
+            onOpenChange();
+        } catch (err) {
+            console.error("Erro ao salvar produto", err);
+            toast.error("Erro ao salvar produto")
+        }
     };
 
     return (
@@ -64,6 +77,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                        onValueChange={(val) => handleChange("description", val)} />
                                 <Input label="Preço" type="number" value={form.price.toString()}
                                        onValueChange={(val) => handleChange("price", val)} />
+                                <Input label="Estoque" type="number" value={form.price.toString()} placeholder={"Quantidade em estoque"}
+                                       onValueChange={(val) => handleChange("storage", val)} />
                             {/*    todo Adicionar um input de arquivo que aceita arquivo de foto. */}
                             </ModalBody>
                             <ModalFooter>
