@@ -27,3 +27,4 @@ pids
 # Others
 dist/
 coverage/
+.vercel
