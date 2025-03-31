@@ -11,3 +11,17 @@ export const formatPrice = (price) => {
   return numericPrice.toLocaleString("pt-BR", {style: "currency", currency: "BRL"})
 
 }
+
+export function validateProductName(value) {
+  return value.trim().length >= 3;
+}
+
+export function validatePrice(value) {
+  const price = parseFloat(value);
+  return !isNaN(price) && price >= 0;
+}
+
+export function validateStorage(value) {
+  const stock = parseInt(value);
+  return !isNaN(stock) && stock >= 0;
+}

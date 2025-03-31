@@ -53,7 +53,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                 <div className="flex flex-col w-full sm:w-4/12 justify-evenly">
                                     {!product.description
                                         ?
-                                        <Card className="min-w-full min-h-full">
+                                        <Card className="min-w-full">
                                             <CardBody>
                                                 <Code color="primary" className="w-fit text-end self-center">
                                                     {formatPrice(product.price)}
@@ -61,7 +61,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                             </CardBody>
                                         </Card>
                                         :
-                                        <Card className="min-w-full min-h-full">
+                                        <Card className="min-w-full">
                                             <CardBody>
                                                 <span>{product.description}</span>
                                             </CardBody>

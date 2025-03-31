@@ -10,6 +10,7 @@ import {Product} from "@/types";
 import {ProductModal} from "@/components/productModal";
 import {createProduct, updateProduct} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
+import {validatePrice, validateProductName, validateStorage} from "@/app/lib/text-format";
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -41,7 +42,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
     }, [product]);
 
-    const handleChange = (field: keyof Product, value: string) => {
+    const handleChange = (field: keyof Product, value: any) => {
         setForm((prev) => ({
             ...prev,
             [field]: field === "price" ? parseFloat(value) : value
@@ -63,6 +64,63 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
     };
 
+    const isNameInvalid = React.useMemo(() => {
+        if (form.name === "") return false;
+        return !validateProductName(form.name);
+    }, [form.name]);
+
+    const isPriceInvalid = React.useMemo(() => {
+        return !validatePrice(form.price.toString());
+    }, [form.price]);
+
+    const isStorageInvalid = React.useMemo(() => {
+        return !validateStorage(form.storage.toString());
+    }, [form.storage]);
+
+    function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            const img = new Image();
+            img.src = reader.result as string;
+
+            img.onload = () => {
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 800;
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = (height * MAX_WIDTH) / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = (width * MAX_HEIGHT) / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // qualidade 70%
+                setForm((prev) => ({ ...prev, image: compressedBase64 }));
+            };
+        };
+    }
+
+
     return (
         <>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
@@ -71,15 +129,71 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         <>
                             <ModalHeader>{product ? "Editar Produto" : "Novo Produto"}</ModalHeader>
                             <ModalBody className="gap-3">
-                                <Input label="Nome" value={form.name}
-                                       onValueChange={(val) => handleChange("name", val)} />
-                                <Input label="Descrição" value={form.description}
-                                       onValueChange={(val) => handleChange("description", val)} />
-                                <Input label="Preço" type="number" value={form.price.toString()}
-                                       onValueChange={(val) => handleChange("price", val)} />
-                                <Input label="Estoque" type="number" value={form.price.toString()} placeholder={"Quantidade em estoque"}
-                                       onValueChange={(val) => handleChange("storage", val)} />
-                            {/*    todo Adicionar um input de arquivo que aceita arquivo de foto. */}
+                                <Input
+                                    label="Nome"
+                                    value={form.name}
+                                    onValueChange={(val) => handleChange("name", val)}
+                                    isInvalid={isNameInvalid}
+                                    color={isNameInvalid ? "danger" : "default"}
+                                    errorMessage={isNameInvalid && "Nome deve ter ao menos 3 caracteres"}
+                                />
+
+                                <Input
+                                    label="Descrição"
+                                    value={form.description}
+                                    onValueChange={(val) => handleChange("description", val)}
+                                    color={"default"}
+                                />
+
+                                <Input
+                                    label="Preço"
+                                    type="number"
+                                    value={form.price.toString()}
+                                    onValueChange={(val) => handleChange("price", val)}
+                                    isInvalid={isPriceInvalid}
+                                    color={isPriceInvalid ? "danger" : "default"}
+                                    errorMessage={isPriceInvalid && "Preço deve ser um número positivo"}
+                                />
+
+                                <Input
+                                    label="Estoque"
+                                    type="number"
+                                    value={form.storage.toString()}
+                                    placeholder="Quantidade em estoque"
+                                    onValueChange={(val) => handleChange("storage", parseInt(val))}
+                                    isInvalid={isStorageInvalid}
+                                    color={isStorageInvalid ? "danger" : "default"}
+                                    errorMessage={isStorageInvalid && "Estoque deve ser um número inteiro positivo"}
+                                />
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-sm font-medium text-default-600">Imagem do Produto</label>
+
+                                    <div className="relative">
+                                        <label
+                                            htmlFor="image-upload"
+                                            className="cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-default-100 hover:bg-default-200 border border-default-300 text-sm rounded-md transition-colors"
+                                        >
+                                            Selecionar imagem
+                                        </label>
+                                        <input
+                                            id="image-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            onChange={handleImageUpload}
+                                            className="hidden"
+                                        />
+                                    </div>
+
+                                    {form.image && (
+                                        <img
+                                            src={form.image}
+                                            alt="Prévia da imagem"
+                                            className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
+                                        />
+                                    )}
+                                </div>
                             </ModalBody>
                             <ModalFooter>
                                 <Button color="default" variant="flat" onPress={() => setPreviewOpen(true)}>
@@ -101,6 +215,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 isOpen={previewOpen}
                 onOpenChange={() => setPreviewOpen(false)}
                 product={form}
+                hideFooter
             />
         </>
     );
