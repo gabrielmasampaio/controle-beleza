@@ -220,12 +220,12 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 }}
             />
 
-            <RemoveItemModal
+            {selectedItem && <RemoveItemModal
                 isOpen={isRemoveItemOpen}
-                item={selectedItem} //Change this to accept Product instead of Item
+                item={{...selectedItem, quantity: 0}}
                 onOpenChange={onRemoveItemOpenChange}
                 onConfirmRemoval={onDeleteItem}
-            />
+            />}
         </div>
     );
 }
