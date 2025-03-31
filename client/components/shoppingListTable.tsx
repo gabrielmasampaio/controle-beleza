@@ -135,7 +135,7 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                           onOpenChange={onProductOpenChange}/>
             <RemoveItemModal isOpen={isRemoveItemOpen} item={selectedItem} onOpenChange={onRemoveItemOpenChange}
                              onConfirmRemoval={(itemId: string) => {
-                                 toast.error("Product removido da lista!");
+                                 toast.error("Produto removido da lista!");
                                  removeItem(itemId)
                              }}/>
         </div>
