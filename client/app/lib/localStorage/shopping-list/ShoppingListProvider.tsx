@@ -6,8 +6,8 @@ import { ShoppingItem } from "@/types"
 interface ShoppingListContextType {
     items: ShoppingItem[];
     addItem: (item: ShoppingItem) => void;
-    removeItem: (id: number) => void;
-    updateQuantity: (id: number, quantity: number) => void;
+    removeItem: (_id: string) => void;
+    updateQuantity: (_id: string, quantity: number) => void;
     clearList: () => void;
     sumListValue: () => number;
 }
@@ -30,22 +30,22 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
 
     const addItem = (item: ShoppingItem) => {
         setItems((prev) => {
-            const exists = prev.find((i) => i.id === item.id);
+            const exists = prev.find((i) => i._id === item._id);
             if (exists) {
-                return prev.map((i) => i.id === item.id ? { ...i, quantity: i.storage + item.storage } : i);
+                return prev.map((i) => i._id === item._id ? { ...i, quantity: i.quantity + item.quantity } : i);
             }
             return [...prev, item];
         });
     };
 
-    const removeItem = (id: number) => {
-        setItems((prev) => prev.filter((item) => item.id !== id));
+    const removeItem = (_id: string) => {
+        setItems((prev) => prev.filter((item) => item._id !== _id));
     };
 
-    const updateQuantity = (id: number, quantity: number) => {
-        if(quantity === 0) removeItem(id)
+    const updateQuantity = (_id: string, quantity: number) => {
+        if(quantity === 0) removeItem(_id)
         else
-            setItems((prev) => prev.map((item) => item.id === id ? { ...item, quantity } : item));
+            setItems((prev) => prev.map((item) => item._id === _id ? { ...item, quantity } : item));
     };
 
     const clearList = () => {
@@ -53,7 +53,7 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
     };
 
     const sumListValue = () => {
-        return items.reduce((acc, item) => acc + item.price * item.storage, 0);
+        return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
     }
 
     return (

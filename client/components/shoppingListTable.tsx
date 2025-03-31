@@ -100,18 +100,18 @@ export default function ShoppingListTable({items, addQuantityToItem, removeItem}
                                         <span
                                             className="text-lg cursor-pointer active:opacity-50"
                                             onClick={() =>
-                                                item.storage === 1
+                                                item.quantity === 1
                                                     ? handleRemoveProduct(item)
-                                                    : addQuantityToItem(item._id, item.storage - 1)
+                                                    : addQuantityToItem(item._id, item.quantity - 1)
                                             }
                                         >
                                         –
                                         </span>
-                                        <span>{item.storage}</span>
+                                        <span>{item.quantity}</span>
                                         <span
                                             className="text-lg cursor-pointer active:opacity-50"
                                             onClick={() => {
-                                                addQuantityToItem(item._id, item.storage + 1)
+                                                addQuantityToItem(item._id, item.quantity + 1)
                                             }}
                                         >
                                             +
