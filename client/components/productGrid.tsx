@@ -41,7 +41,6 @@ export default function ProductGrid() {
         async function fetchItems() {
             try {
                 const productsResponse = await getProducts();
-                console.log(productsResponse)
                 setProducts(productsResponse);
             } catch (err) {
                 console.error("Erro ao carregar produtos:", err);

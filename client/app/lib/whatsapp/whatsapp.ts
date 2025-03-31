@@ -16,6 +16,5 @@ export function buildWhatsappUrl(items: ShoppingItem[]): string {
     const totalLine = `\n\n *• Total = ${formatPrice(total)}*`
 
     const message = encodeURIComponent(`${intro}${itemList}${totalLine}`);
-    console.log(message)
     return `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
 }

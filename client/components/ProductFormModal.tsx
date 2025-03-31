@@ -114,12 +114,17 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 const ctx = canvas.getContext("2d");
                 ctx?.drawImage(img, 0, 0, width, height);
 
-                const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7); // qualidade 70%
+                const quality = file.size > 2097152 ? 0.5 : 0.7;
+                const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
                 setForm((prev) => ({ ...prev, image: compressedBase64 }));
             };
         };
     }
 
+
+    const removeImage = () => {
+        setForm((prev) => ({ ...prev, image: "" }));
+    };
 
     return (
         <>
@@ -180,18 +185,27 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                             id="image-upload"
                                             type="file"
                                             accept="image/*"
-                                            capture="environment"
                                             onChange={handleImageUpload}
                                             className="hidden"
                                         />
                                     </div>
 
                                     {form.image && (
-                                        <img
-                                            src={form.image}
-                                            alt="Prévia da imagem"
-                                            className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
-                                        />
+                                        <div className="flex flex-col items-start gap-2">
+                                            <img
+                                                src={form.image}
+                                                alt="Prévia da imagem"
+                                                className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
+                                            />
+                                            <Button
+                                                size="sm"
+                                                color="danger"
+                                                variant="light"
+                                                onPress={removeImage}
+                                            >
+                                                Remover imagem
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                             </ModalBody>
