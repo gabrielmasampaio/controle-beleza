@@ -2,15 +2,23 @@
 
 import React from "react";
 import {
-    Modal, ModalBody, ModalContent, ModalFooter, ModalHeader
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
 } from "@nextui-org/modal";
-import {Button} from "@nextui-org/button";
-import {Input} from "@nextui-org/input";
-import {Product} from "@/types";
-import {ProductModal} from "@/components/productModal";
-import {createProduct, updateProduct} from "@/app/lib/api/product.api";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import { Product } from "@/types";
+import { ProductModal } from "@/components/productModal";
+import { createProduct, updateProduct } from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
-import {validatePrice, validateProductName, validateStorage} from "@/app/lib/text-format";
+import {
+    validatePrice,
+    validateProductName,
+    validateStorage,
+} from "@/app/lib/text-format";
 
 interface ProductFormModalProps {
     isOpen: boolean;
@@ -23,7 +31,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                                       isOpen,
                                                                       onOpenChange,
                                                                       product,
-                                                                      onSave
+                                                                      onSave,
                                                                   }) => {
     const [form, setForm] = React.useState<Product>({
         _id: product?._id,
@@ -31,8 +39,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         description: product?.description ?? "",
         price: product?.price ?? 0,
         storage: product?.storage ?? 0,
-        image: product?.image ?? ""
-    })
+        image: product?.image ?? "",
+    });
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
@@ -45,7 +53,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     const handleChange = (field: keyof Product, value: any) => {
         setForm((prev) => ({
             ...prev,
-            [field]: field === "price" ? parseFloat(value) : value
+            [field]: field === "price" ? parseFloat(value) : value,
         }));
     };
 
@@ -54,13 +62,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             const saved = form._id
                 ? await updateProduct(form)
                 : await createProduct(form);
-
-            toast.success("Produto salvo com sucesso")
+            toast.success("Produto salvo com sucesso");
             onSave(saved);
             onOpenChange();
         } catch (err) {
             console.error("Erro ao salvar produto", err);
-            toast.error("Erro ao salvar produto")
+            toast.error("Erro ao salvar produto");
         }
     };
 
@@ -89,8 +96,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             img.src = reader.result as string;
 
             img.onload = () => {
-                const MAX_WIDTH = 800;
-                const MAX_HEIGHT = 800;
+                // Ajusta resolução com base na largura da tela: se mobile, usar menor dimensão
+                const isMobile = window.innerWidth < 768;
+                const MAX_WIDTH = isMobile ? 600 : 800;
+                const MAX_HEIGHT = isMobile ? 600 : 800;
 
                 let width = img.width;
                 let height = img.height;
@@ -121,33 +130,41 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         };
     }
 
-
     const removeImage = () => {
         setForm((prev) => ({ ...prev, image: "" }));
     };
 
     return (
         <>
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+            <Modal
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                size="lg"
+                className="w-full max-w-[500px] mx-auto"
+            >
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader>{product ? "Editar Produto" : "Novo Produto"}</ModalHeader>
-                            <ModalBody className="gap-3">
+                            <ModalHeader>
+                                {product ? "Editar Produto" : "Novo Produto"}
+                            </ModalHeader>
+                            <ModalBody className="gap-3 max-h-[80vh] overflow-y-auto">
                                 <Input
                                     label="Nome"
                                     value={form.name}
                                     onValueChange={(val) => handleChange("name", val)}
                                     isInvalid={isNameInvalid}
                                     color={isNameInvalid ? "danger" : "default"}
-                                    errorMessage={isNameInvalid && "Nome deve ter ao menos 3 caracteres"}
+                                    errorMessage={
+                                        isNameInvalid && "Nome deve ter ao menos 3 caracteres"
+                                    }
                                 />
 
                                 <Input
                                     label="Descrição"
                                     value={form.description}
                                     onValueChange={(val) => handleChange("description", val)}
-                                    color={"default"}
+                                    color="default"
                                 />
 
                                 <Input
@@ -157,7 +174,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     onValueChange={(val) => handleChange("price", val)}
                                     isInvalid={isPriceInvalid}
                                     color={isPriceInvalid ? "danger" : "default"}
-                                    errorMessage={isPriceInvalid && "Preço deve ser um número positivo"}
+                                    errorMessage={
+                                        isPriceInvalid && "Preço deve ser um número positivo"
+                                    }
                                 />
 
                                 <Input
@@ -165,14 +184,20 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     type="number"
                                     value={form.storage.toString()}
                                     placeholder="Quantidade em estoque"
-                                    onValueChange={(val) => handleChange("storage", parseInt(val))}
+                                    onValueChange={(val) =>
+                                        handleChange("storage", parseInt(val))
+                                    }
                                     isInvalid={isStorageInvalid}
                                     color={isStorageInvalid ? "danger" : "default"}
-                                    errorMessage={isStorageInvalid && "Estoque deve ser um número inteiro positivo"}
+                                    errorMessage={
+                                        isStorageInvalid && "Estoque deve ser um número inteiro positivo"
+                                    }
                                 />
 
                                 <div className="flex flex-col gap-2">
-                                    <label className="text-sm font-medium text-default-600">Imagem do Produto</label>
+                                    <label className="text-sm font-medium text-default-600">
+                                        Imagem do Produto
+                                    </label>
 
                                     <div className="relative">
                                         <label
@@ -210,7 +235,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                                <Button color="default" variant="flat" onPress={() => setPreviewOpen(true)}>
+                                <Button
+                                    color="default"
+                                    variant="flat"
+                                    onPress={() => setPreviewOpen(true)}
+                                >
                                     Prever Produto
                                 </Button>
                                 <Button color="danger" variant="light" onPress={onClose}>
