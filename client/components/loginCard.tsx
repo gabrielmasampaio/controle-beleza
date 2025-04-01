@@ -7,6 +7,7 @@ import {Input} from "@nextui-org/input";
 import React from "react";
 import {login} from "@/app/lib/api/auth";
 import {saveToken} from "@/app/lib/localStorage/auth";
+import {Button} from "@nextui-org/button";
 
 export default function LoginCard({
                                       className = "", onLoginSuccess = () => {
@@ -72,16 +73,16 @@ export default function LoginCard({
                             >
                                 Início
                             </Link>
-                            <button
+                            <Button
                                 type="submit"
                                 className={buttonStyles({
                                     color: "primary",
                                     radius: "full",
                                     variant: "shadow",
-                                }) + " cursor-pointer border-0 bg-transparent"}
+                                })}
                             >
                                 Entrar
-                            </button>
+                            </Button>
                         </div>
                     </CardFooter>
                 </form>
