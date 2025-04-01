@@ -33,21 +33,21 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                                       product,
                                                                       onSave,
                                                                   }) => {
-    const [form, setForm] = React.useState<Product>({
-        _id: product?._id,
-        name: product?.name ?? "",
-        description: product?.description ?? "",
-        price: product?.price ?? 0,
-        storage: product?.storage ?? 0,
-        image: product?.image ?? "",
-    });
+    const defaultProduct: Product = {
+        _id: undefined,
+        name: "",
+        description: "",
+        price: 0,
+        storage: 0,
+        image: "",
+    };
+
+    const [form, setForm] = React.useState<Product>(product ?? defaultProduct);
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
     React.useEffect(() => {
-        if (product) {
-            setForm(product);
-        }
+        setForm(product ?? defaultProduct);
     }, [product]);
 
     const handleChange = (field: keyof Product, value: any) => {
@@ -63,6 +63,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 ? await updateProduct(form)
                 : await createProduct(form);
             toast.success("Produto salvo com sucesso");
+            setForm(defaultProduct)
             onSave(saved);
             onOpenChange();
         } catch (err) {
