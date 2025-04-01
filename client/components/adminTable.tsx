@@ -1,42 +1,47 @@
 'use client';
 
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import {
-    Table, TableHeader, TableColumn, TableBody, TableRow,
-    TableCell, User, Tooltip, Pagination
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
+    User,
+    Tooltip,
+    Pagination,
 } from "@nextui-org/react";
-import {EyeIcon, EditIcon, DeleteIcon} from "@nextui-org/shared-icons";
-import {useDisclosure} from "@nextui-org/use-disclosure";
-import {Product} from "@/types";
-import {formatPrice} from "@/app/lib/text-format";
-import {ProductFormModal} from "@/components/ProductFormModal";
-import {RemoveItemModal} from "@/components/RemoveItemModal";
-import {Input} from "@nextui-org/input";
-import {SearchIcon} from "@/components/icons";
-import {deleteProduct, getProducts} from "@/app/lib/api/product.api";
+import { EyeIcon, EditIcon, DeleteIcon } from "@nextui-org/shared-icons";
+import { useDisclosure } from "@nextui-org/use-disclosure";
+import { Product } from "@/types";
+import { formatPrice } from "@/app/lib/text-format";
+import { ProductFormModal } from "@/components/ProductFormModal";
+import { RemoveItemModal } from "@/components/RemoveItemModal";
+import { Input } from "@nextui-org/input";
+import { SearchIcon } from "@/components/icons";
+import { deleteProduct, getProducts } from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
-import {Button} from "@nextui-org/button";
+import { Button } from "@nextui-org/button";
 
 interface AdminTableProps {
     className?: string;
 }
 
-export default function AdminTable({className = ""}: AdminTableProps) {
+export default function AdminTable({ className = "" }: AdminTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<Product>();
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const {
         isOpen: isRemoveItemOpen,
         onOpen: onRemoveItemOpen,
-        onOpenChange: onRemoveItemOpenChange
+        onOpenChange: onRemoveItemOpenChange,
     } = useDisclosure();
 
     const [products, setProducts] = React.useState<Product[]>([]);
-
     const [page, setPage] = React.useState(1);
     const rowsPerPage = 8;
     const pages = Math.ceil(products.length / rowsPerPage);
     const [searchTerm, setSearchTerm] = React.useState("");
-
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
 
     const filteredItems = React.useMemo(() => {
@@ -44,7 +49,6 @@ export default function AdminTable({className = ""}: AdminTableProps) {
             item.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [products, searchTerm]);
-
 
     const pageProducts = React.useMemo(() => {
         const start = (page - 1) * rowsPerPage;
@@ -61,7 +65,6 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 console.error("Erro ao buscar produtos:", err);
             }
         }
-
         fetchProducts();
     }, []);
 
@@ -78,15 +81,14 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     const onDeleteItem = async (itemId: string) => {
         try {
             deleteProduct(itemId)
-                .then((data) => {
-                    console.log(data)
-                    toast.success("Produto removido")
+                .then(() => {
+                    toast.success("Produto removido");
                 })
                 .catch((err) => {
-                    console.log("Error deleting product", err)
-                    toast.success("Erro ao deletar produto")
-                })
-            setProducts(prev => prev.filter(i => i._id !== selectedItem?._id));
+                    console.log("Error deleting product", err);
+                    toast.error("Erro ao deletar produto");
+                });
+            setProducts((prev) => prev.filter((i) => i._id !== selectedItem?._id));
             onRemoveItemOpenChange();
         } catch (err) {
             console.error("Erro ao deletar:", err);
@@ -94,7 +96,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
     };
 
     return (
-        <div className={`flex flex-col gap-3 ${className}`}>
+        <div className={`flex flex-col gap-3 w-full ${className}`}>
             <div className="flex justify-between items-center px-2 gap-2">
                 <Input
                     size="sm"
@@ -102,7 +104,7 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                     className="max-w-[200px]"
                     label="Buscar"
                     value={searchTerm}
-                    startContent={<SearchIcon size={5}/>}
+                    startContent={<SearchIcon size={5} />}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onClear={() => setSearchTerm("")}
                 />
@@ -115,11 +117,13 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                         onOpen();
                     }}
                 >
-                    Novo Produto
+                    Novo
                 </Button>
             </div>
+
             <Table
                 aria-label="Tabela de produtos"
+                className="w-full table-fixed"
                 bottomContent={
                     pages > 1 && (
                         <div className="flex w-full justify-center">
@@ -137,28 +141,32 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 }
             >
                 <TableHeader>
-                    <TableColumn>Produto</TableColumn>
-                    <TableColumn>Preço</TableColumn>
-                    <TableColumn>Ações</TableColumn>
+                    <TableColumn className="w-1/3 text-xs sm:text-base">Produto</TableColumn>
+                    <TableColumn className="w-1/3 text-xs sm:text-base">Preço</TableColumn>
+                    <TableColumn className="w-1/3 text-xs sm:text-base">Ações</TableColumn>
                 </TableHeader>
 
                 <TableBody emptyContent={"Nenhum produto encontrado."}>
                     {pageProducts.map((product) => (
-                        <TableRow key={product._id}
-                                  className={product._id === highlightedId ? "text-warning transition duration-75" : ""}>
-                            <TableCell className="flex products-center gap-1">
+                        <TableRow
+                            key={product._id}
+                            className={
+                                product._id === highlightedId ? "text-warning transition duration-75" : ""
+                            }
+                        >
+                            <TableCell className="flex items-center gap-1 text-xs sm:text-base">
                                 <Tooltip
                                     className="cursor-pointer"
                                     onClick={() => handleOpenProduct(product)}
                                     content={
-                                        <div className="text-xs flex products-center gap-2">
-                                            <EyeIcon/> ver produto
+                                        <div className="text-xs flex items-center gap-2">
+                                            <EyeIcon /> ver produto
                                         </div>
                                     }
                                 >
                                     <User
                                         className="hover:opacity-50"
-                                        avatarProps={{radius: "lg", src: product.image}}
+                                        avatarProps={{ radius: "lg", src: product.image }}
                                         name={product.name}
                                     >
                                         {product.description}
@@ -166,28 +174,28 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                                 </Tooltip>
                             </TableCell>
 
-                            <TableCell className="text-left">
+                            <TableCell className="text-left text-xs sm:text-base">
                                 {formatPrice(product.price)}
                             </TableCell>
 
-                            <TableCell>
-                                <div className="flex products-center justify-center gap-4">
+                            <TableCell className="text-xs sm:text-base">
+                                <div className="flex items-center justify-center gap-4">
                                     <Tooltip content="Editar Produto">
-										<span
-                                            className="text-lg cursor-pointer active:opacity-50"
-                                            onClick={() => handleOpenProduct(product)}
-                                        >
-											<EditIcon/>
-										</span>
+                    <span
+                        className="text-lg cursor-pointer active:opacity-50"
+                        onClick={() => handleOpenProduct(product)}
+                    >
+                      <EditIcon />
+                    </span>
                                     </Tooltip>
 
                                     <Tooltip color="danger" content="Remover Produto">
-										<span
-                                            onClick={() => handleDelete(product)}
-                                            className="text-lg text-red-500 cursor-pointer active:opacity-50"
-                                        >
-											<DeleteIcon/>
-										</span>
+                    <span
+                        onClick={() => handleDelete(product)}
+                        className="text-lg text-red-500 cursor-pointer active:opacity-50"
+                    >
+                      <DeleteIcon />
+                    </span>
                                     </Tooltip>
                                 </div>
                             </TableCell>
@@ -203,7 +211,6 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 onSave={(savedProduct) => {
                     setProducts((prev) => {
                         const index = prev.findIndex((item) => item._id === savedProduct._id);
-
                         setHighlightedId(savedProduct._id ?? null);
                         setTimeout(() => setHighlightedId(null), 3000);
 
@@ -214,8 +221,6 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                         } else {
                             return [savedProduct, ...prev];
                         }
-
-
                     });
                 }}
             />
