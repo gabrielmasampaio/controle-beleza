@@ -32,7 +32,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
     };
 
     return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl" className={"max-w-[90vw] max-h-[80vh]"}>
             <ModalContent>
                 {(onClose) => (
                     <>

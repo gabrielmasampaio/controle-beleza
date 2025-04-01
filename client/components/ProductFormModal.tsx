@@ -141,7 +141,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 isOpen={isOpen}
                 onOpenChange={onOpenChange}
                 size="lg"
-                className="w-full max-w-[500px] mx-auto"
+                className={"max-w-[90vw] max-h-[80vh]"}
             >
                 <ModalContent>
                     {(onClose) => (

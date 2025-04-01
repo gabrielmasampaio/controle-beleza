@@ -19,7 +19,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
 
     return (
         <>
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size={"md"}>
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} size={"md"} className={"max-w-[90vw]"}>
                 <ModalContent>
                     {(OnClose) => (
                         <>
