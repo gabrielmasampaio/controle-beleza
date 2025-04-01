@@ -13,7 +13,7 @@ import {Card, CardBody, CardFooter} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
 import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 import toast from 'react-hot-toast';
-import { DEFAULT_IMAGE } from "@/app/lib/constants";
+import {DEFAULT_IMAGE} from "@/app/lib/constants";
 
 interface ProductModalProps {
     product: Product;
@@ -37,8 +37,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex flex-col gap-1">{product.name}</ModalHeader>
-                        <ModalBody>
-                            <div className="flex flex-col sm:flex-row min-w-full min-h-full gap-4">
+                        <ModalBody className="max-h-[80vh] overflow-y-auto">
+                            <div className="flex flex-col sm:flex-row min-w-full gap-4">
                                 <div className="w-full sm:w-8/12">
                                     <Image
                                         shadow="sm"
@@ -92,8 +92,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                                         Adicionar à Lista
                                     </Button>
                                     <Tooltip content="Pedir este item via whatsapp">
-                                        <Button color="primary" onPress={() =>{
-                                            const url = buildWhatsappUrl([{ ...product, quantity: 1 }]);
+                                        <Button color="primary" onPress={() => {
+                                            const url = buildWhatsappUrl([{...product, quantity: 1}]);
                                             window.open(url, "_blank");
                                         }}>
                                             Pedir agora
