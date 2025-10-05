@@ -20,7 +20,7 @@ export function Providers({children, themeProps}: ProvidersProps) {
         <HeroUIProvider navigate={router.push}>
             <NextThemesProvider {...themeProps}>
                 <ShoppingListProvider>
-                    <Toaster containerClassName={"mt-[50px]"} position="top-right" toastOptions={{duration: 3000}} />
+                    <Toaster containerClassName={"mt-[50px]"} position="top-left" toastOptions={{duration: 3000}} />
                         {children}
                 </ShoppingListProvider>
             </NextThemesProvider>

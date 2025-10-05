@@ -1,7 +1,9 @@
 "use client";
 
 import React, { createContext, useEffect, useState } from "react";
-import { ShoppingItem } from "@/types"
+import { ShoppingItem } from "@/types";
+import { ShoppingCartDrawer } from "@/components/ShoppingCartDrawer";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ShoppingListContextType {
     items: ShoppingItem[];
@@ -10,12 +12,17 @@ interface ShoppingListContextType {
     updateQuantity: (_id: string, quantity: number) => void;
     clearList: () => void;
     sumListValue: () => number;
+    isDrawerOpen: boolean;
+    openDrawer: () => void;
+    closeDrawer: () => void;
 }
 
 export const ShoppingListContext = createContext<ShoppingListContextType | null>(null);
 
 export const ShoppingListProvider = ({ children }: { children: React.ReactNode }) => {
     const [items, setItems] = useState<ShoppingItem[]>([]);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const isMobile = useMediaQuery("(max-width: 639px)");
 
     useEffect(() => {
         const stored = localStorage.getItem("shopping-list");
@@ -28,6 +35,9 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
         localStorage.setItem("shopping-list", JSON.stringify(items));
     }, [items]);
 
+    const openDrawer = () => setIsDrawerOpen(true);
+    const closeDrawer = () => setIsDrawerOpen(false);
+
     const addItem = (item: ShoppingItem) => {
         setItems((prev) => {
             const exists = prev.find((i) => i._id === item._id);
@@ -36,6 +46,7 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
             }
             return [...prev, item];
         });
+        openDrawer();
     };
 
     const removeItem = (_id: string) => {
@@ -57,8 +68,9 @@ export const ShoppingListProvider = ({ children }: { children: React.ReactNode }
     }
 
     return (
-        <ShoppingListContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearList, sumListValue }}>
+        <ShoppingListContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearList, sumListValue, isDrawerOpen, openDrawer, closeDrawer }}>
             {children}
+            {!isMobile && <ShoppingCartDrawer />}
         </ShoppingListContext.Provider>
     );
 };

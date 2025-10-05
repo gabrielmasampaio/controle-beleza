@@ -6,10 +6,10 @@ export const siteConfig = {
     navItems: [
         {
             label: "Catálogo",
-            href: "/catalogue",
+            href: "/",
         },
         {
-            label: "Contato",
+            label: "Entrar em contato",
             href: "/contact",
         },
     ],
