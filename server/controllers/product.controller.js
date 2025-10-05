@@ -45,9 +45,9 @@ async function updateProduct(req, res) {
  */
 async function getProducts(req, res) {
     try {
-        const filters = req.query;
-        const products = await productService.getAllProducts(filters);
-        return res.status(200).json(products);
+        const { page, limit, searchTerm, ...filters } = req.query;
+        const productsData = await productService.getAllProducts(filters, parseInt(page), parseInt(limit));
+        return res.status(200).json(productsData);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);
         return res.status(500).json({ message: error.message });

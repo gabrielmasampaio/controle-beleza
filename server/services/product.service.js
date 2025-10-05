@@ -1,4 +1,6 @@
 const Product = require('../models/Product');
+const Category = require('../models/Category'); // Import Category model
+const Brand = require('../models/Brand'); // Import Brand model
 
 /**
  * Cria um novo produto no banco
@@ -13,10 +15,6 @@ async function createProduct(data) {
         throw new Error('Erro ao criar produto: ' + error.message);
     }
 }
-
-module.exports = {
-    createProduct,
-};
 
 /**
  * Atualiza um produto por ID com os campos fornecidos
@@ -41,11 +39,39 @@ async function updateProductById(id, data) {
 }
 
 /**
- * Retorna lista de produtos com filtros opcionais
+ * Retorna lista de produtos com filtros opcionais, paginação e busca wildcard
  */
-async function getAllProducts(filters) {
+async function getAllProducts(filters, page = 1, limit = 20) {
     try {
         const query = {};
+        const options = {
+            skip: (page - 1) * limit,
+            limit: limit,
+            populate: ['categories', 'brand']
+        };
+
+        // Wildcard search
+        if (filters.searchTerm) {
+            const searchRegex = { $regex: filters.searchTerm, $options: 'i' };
+            const orConditions = [
+                { name: searchRegex },
+                { description: searchRegex },
+            ];
+
+            // Search in categories by name
+            const matchingCategories = await Category.find({ name: searchRegex }).select('_id');
+            if (matchingCategories.length > 0) {
+                orConditions.push({ categories: { $in: matchingCategories.map(cat => cat._id) } });
+            }
+
+            // Search in brands by name
+            const matchingBrands = await Brand.find({ name: searchRegex }).select('_id');
+            if (matchingBrands.length > 0) {
+                orConditions.push({ brand: { $in: matchingBrands.map(b => b._id) } });
+            }
+
+            query.$or = orConditions;
+        }
 
         if (filters.name) {
             query.name = { $regex: filters.name, $options: 'i' };
@@ -71,9 +97,19 @@ async function getAllProducts(filters) {
             query.brand = filters.brand; // Filter by brand ID
         }
 
-        return await Product.find(query)
-            .populate('categories') // Populate category details
-            .populate('brand'); // Populate brand details
+        if (filters.disponibilidade) {
+            query.disponibilidade = filters.disponibilidade;
+        }
+
+        const products = await Product.find(query, null, options);
+        const totalProducts = await Product.countDocuments(query);
+
+        return {
+            products,
+            totalProducts,
+            page,
+            pages: Math.ceil(totalProducts / limit)
+        };
     } catch (error) {
         throw new Error('Erro ao buscar produtos: ' + error.message);
     }

@@ -78,7 +78,7 @@ function validatePartialProduct(req, res, next) {
 }
 
 function validateProductQuery(req, res, next) {
-    const { name, minPrice, maxPrice, minStock, maxStock, category, brand } = req.query;
+    const { name, minPrice, maxPrice, minStock, maxStock, category, brand, page, limit, searchTerm } = req.query;
 
     if (minPrice !== undefined && isNaN(parseFloat(minPrice))) {
         return res.status(400).json({ message: '"minPrice" deve ser um número válido.' });
@@ -106,6 +106,18 @@ function validateProductQuery(req, res, next) {
 
     if (brand !== undefined && !mongoose.Types.ObjectId.isValid(brand)) {
         return res.status(400).json({ message: '"brand" deve ser um ID de marca válido.' });
+    }
+
+    if (page !== undefined && (!Number.isInteger(Number(page)) || Number(page) < 1)) {
+        return res.status(400).json({ message: '"page" deve ser um número inteiro positivo.' });
+    }
+
+    if (limit !== undefined && (!Number.isInteger(Number(limit)) || Number(limit) < 1)) {
+        return res.status(400).json({ message: '"limit" deve ser um número inteiro positivo.' });
+    }
+
+    if (searchTerm !== undefined && typeof searchTerm !== 'string') {
+        return res.status(400).json({ message: '"searchTerm" deve ser uma string.' });
     }
 
     next();
