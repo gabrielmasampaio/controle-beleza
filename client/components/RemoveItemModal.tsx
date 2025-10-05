@@ -1,9 +1,15 @@
 import {ShoppingItem} from "@/types";
-import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
-import {Image} from "@nextui-org/image";
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Image,
+    Button,
+    Tooltip,
+} from "@heroui/react";
 import React from "react";
-import {Button} from "@nextui-org/button";
-import {Tooltip} from "@nextui-org/tooltip";
 import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 

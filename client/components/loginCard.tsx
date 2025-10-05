@@ -1,13 +1,18 @@
 'use client';
-import {Card, CardBody, CardFooter, CardHeader} from "@nextui-org/card";
-import {Divider} from "@nextui-org/divider";
-import {Link} from "@nextui-org/link";
-import {button as buttonStyles} from "@nextui-org/theme";
-import {Input} from "@nextui-org/input";
+import {
+    Card,
+    CardBody,
+    CardFooter,
+    CardHeader,
+    Divider,
+    Link,
+    button as buttonStyles,
+    Input,
+    Button,
+} from "@heroui/react";
 import React from "react";
 import {login} from "@/app/lib/api/auth";
 import {saveToken} from "@/app/lib/localStorage/auth";
-import {Button} from "@nextui-org/button";
 
 export default function LoginCard({
                                       className = "", onLoginSuccess = () => {

@@ -3,10 +3,7 @@
 import {title, subtitle} from "@/components/primitives";
 import {useShoppingList} from "@/app/lib/localStorage/shopping-list/useShoppingList";
 import ShoppingListTable from "@/components/shoppingListTable";
-import {Card, CardBody} from "@nextui-org/card";
-import {Code} from "@nextui-org/code";
-import {button as buttonStyles} from "@nextui-org/theme";
-import {Link} from "@nextui-org/link";
+import {Card, CardBody, Code, button as buttonStyles, Link} from "@heroui/react";
 import {formatPrice} from "@/app/lib/text-format";
 import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 

@@ -6,14 +6,14 @@ import {
     TableBody,
     TableRow,
     TableCell,
-} from "@nextui-org/react";
-import { button as buttonStyles } from "@nextui-org/theme";
+    Link,
+    button as buttonStyles,
+    Tooltip,
+    User,
+    useDisclosure,
+} from "@heroui/react";
+import { EyeIcon, CloseIcon } from "@heroui/shared-icons";
 import { ShoppingItem } from "@/types";
-import { Link } from "@nextui-org/link";
-import { CloseIcon, EyeIcon } from "@nextui-org/shared-icons";
-import { Tooltip } from "@nextui-org/tooltip";
-import { User } from "@nextui-org/user";
-import { useDisclosure } from "@nextui-org/use-disclosure";
 import { ProductModal } from "@/components/productModal";
 import { RemoveItemModal } from "@/components/RemoveItemModal";
 import { formatPrice } from "@/app/lib/text-format";

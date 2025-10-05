@@ -7,9 +7,9 @@ import {
     ModalContent,
     ModalFooter,
     ModalHeader,
-} from "@nextui-org/modal";
-import { Button } from "@nextui-org/button";
-import { Input } from "@nextui-org/input";
+    Button,
+    Input,
+} from "@heroui/react";
 import { Product } from "@/types";
 import { ProductModal } from "@/components/productModal";
 import { createProduct, updateProduct } from "@/app/lib/api/product.api";

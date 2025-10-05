@@ -1,5 +1,4 @@
-import { Link } from "@nextui-org/link";
-import { button as buttonStyles } from "@nextui-org/theme";
+import { button as buttonStyles, Link } from "@heroui/react";
 import { title, subtitle } from "@/components/primitives";
 
 export default function Home() {

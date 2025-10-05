@@ -1,16 +1,24 @@
 'use client'
 
 import type {Product} from "@/types";
-import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "@nextui-org/modal";
-import {Button} from "@nextui-org/button";
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    Button,
+    Image,
+    Code,
+    Tooltip,
+    Card,
+    CardBody,
+    CardFooter,
+    Divider,
+} from "@heroui/react";
 import React from "react";
-import {Image} from "@nextui-org/image";
 import {formatPrice} from "@/app/lib/text-format";
 import {useShoppingList} from "@/app/lib/localStorage/shopping-list/useShoppingList";
-import {Code} from "@nextui-org/code";
-import {Tooltip} from "@nextui-org/tooltip";
-import {Card, CardBody, CardFooter} from "@nextui-org/card";
-import {Divider} from "@nextui-org/divider";
 import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
 import toast from 'react-hot-toast';
 import {DEFAULT_IMAGE} from "@/app/lib/constants";

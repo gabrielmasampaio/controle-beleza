@@ -1,18 +1,24 @@
 'use client'
 import React, {useEffect} from "react";
-import {Card, CardBody, CardFooter} from "@nextui-org/card";
-import {Image} from "@nextui-org/image";
+import {
+    Card,
+    CardBody,
+    CardFooter,
+    Image,
+    Pagination,
+    useDisclosure,
+    Select,
+    SelectItem,
+    Spinner,
+    Input,
+    button as buttonStyles,
+    Link,
+} from "@heroui/react";
 import {formatPrice} from "@/app/lib/text-format";
-import {Pagination} from "@nextui-org/pagination";
-import {useDisclosure} from "@nextui-org/use-disclosure";
 import {ProductModal} from "@/components/productModal";
 import {Product} from "@/types";
-import {Select, SelectItem, Spinner} from "@nextui-org/react";
-import {Input} from "@nextui-org/input";
 import {SearchIcon} from "@/components/icons";
 import {getProducts} from "@/app/lib/api/product.api";
-import {button as buttonStyles} from "@nextui-org/react";
-import {Link} from "@nextui-org/link";
 import {subtitle} from "@/components/primitives";
 import { DEFAULT_IMAGE } from "@/app/lib/constants";
 

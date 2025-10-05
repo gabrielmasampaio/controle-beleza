@@ -1,36 +1,36 @@
 'use client';
 
-import React, { useEffect } from "react";
+import React, {useEffect} from "react";
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    User,
-    Tooltip,
+    Button,
+    Input,
     Pagination,
-} from "@nextui-org/react";
-import { EyeIcon, EditIcon, DeleteIcon } from "@nextui-org/shared-icons";
-import { useDisclosure } from "@nextui-org/use-disclosure";
-import { Product } from "@/types";
-import { formatPrice } from "@/app/lib/text-format";
-import { ProductFormModal } from "@/components/ProductFormModal";
-import { RemoveItemModal } from "@/components/RemoveItemModal";
-import { Input } from "@nextui-org/input";
-import { SearchIcon } from "@/components/icons";
-import { deleteProduct, getProducts } from "@/app/lib/api/product.api";
+    Table,
+    TableBody,
+    TableCell,
+    TableColumn,
+    TableHeader,
+    TableRow,
+    Tooltip,
+    useDisclosure,
+    User,
+} from "@heroui/react";
+import {DeleteIcon, EditIcon, EyeIcon} from "@heroui/shared-icons";
+import {Product} from "@/types";
+import {formatPrice} from "@/app/lib/text-format";
+import {ProductFormModal} from "@/components/ProductFormModal";
+import {RemoveItemModal} from "@/components/RemoveItemModal";
+import {SearchIcon} from "@/components/icons";
+import {deleteProduct, getProducts} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
-import { Button } from "@nextui-org/button";
 
 interface AdminTableProps {
     className?: string;
 }
 
-export default function AdminTable({ className = "" }: AdminTableProps) {
+export default function AdminTable({className = ""}: AdminTableProps) {
     const [selectedItem, setSelectedItem] = React.useState<Product>();
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const {
         isOpen: isRemoveItemOpen,
         onOpen: onRemoveItemOpen,
@@ -65,6 +65,7 @@ export default function AdminTable({ className = "" }: AdminTableProps) {
                 console.error("Erro ao buscar produtos:", err);
             }
         }
+
         fetchProducts();
     }, []);
 
@@ -104,7 +105,7 @@ export default function AdminTable({ className = "" }: AdminTableProps) {
                     className="max-w-[200px]"
                     label="Buscar"
                     value={searchTerm}
-                    startContent={<SearchIcon size={5} />}
+                    startContent={<SearchIcon size={5}/>}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onClear={() => setSearchTerm("")}
                 />
@@ -160,13 +161,13 @@ export default function AdminTable({ className = "" }: AdminTableProps) {
                                     onClick={() => handleOpenProduct(product)}
                                     content={
                                         <div className="text-xs flex items-center gap-2">
-                                            <EyeIcon /> ver produto
+                                            <EyeIcon/> ver produto
                                         </div>
                                     }
                                 >
                                     <User
                                         className="hover:opacity-50"
-                                        avatarProps={{ radius: "lg", src: product.image }}
+                                        avatarProps={{radius: "lg", src: product.image}}
                                         name={product.name}
                                     >
                                         {product.description}
@@ -185,7 +186,7 @@ export default function AdminTable({ className = "" }: AdminTableProps) {
                         className="text-lg cursor-pointer active:opacity-50"
                         onClick={() => handleOpenProduct(product)}
                     >
-                      <EditIcon />
+                      <EditIcon/>
                     </span>
                                     </Tooltip>
 
@@ -194,7 +195,7 @@ export default function AdminTable({ className = "" }: AdminTableProps) {
                         onClick={() => handleDelete(product)}
                         className="text-lg text-red-500 cursor-pointer active:opacity-50"
                     >
-                      <DeleteIcon />
+                      <DeleteIcon/>
                     </span>
                                     </Tooltip>
                                 </div>

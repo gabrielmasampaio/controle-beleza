@@ -1,15 +1,14 @@
 import {
+    Link,
     Navbar as NextUINavbar,
-    NavbarContent,
-    NavbarMenu,
-    NavbarMenuToggle,
     NavbarBrand,
+    NavbarContent,
     NavbarItem,
+    NavbarMenu,
     NavbarMenuItem,
-} from "@nextui-org/navbar";
-import {Link} from "@nextui-org/link";
-
-import {link as linkStyles} from "@nextui-org/theme";
+    NavbarMenuToggle,
+    link as linkStyles
+} from "@heroui/react";
 
 import {siteConfig} from "@/config/site";
 import NextLink from "next/link";

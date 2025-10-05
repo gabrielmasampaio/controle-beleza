@@ -1,6 +1,5 @@
 import {subtitle, title} from "@/components/primitives";
-import { button as buttonStyles } from "@nextui-org/theme";
-import {Link} from "@nextui-org/link";
+import { button as buttonStyles, Link } from "@heroui/react";
 
 export default function ContactPage() {
 	return (

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {NextUIProvider} from "@nextui-org/system";
+import {HeroUIProvider} from "@heroui/react";
 import {useRouter} from 'next/navigation'
 import {ThemeProvider as NextThemesProvider} from "next-themes";
 import {ThemeProviderProps} from "next-themes/dist/types";
@@ -17,13 +17,13 @@ export function Providers({children, themeProps}: ProvidersProps) {
     const router = useRouter();
 
     return (
-        <NextUIProvider navigate={router.push}>
+        <HeroUIProvider navigate={router.push}>
             <NextThemesProvider {...themeProps}>
                 <ShoppingListProvider>
-                    <Toaster containerClassName={"mt-[50px]"} position="top-left" toastOptions={{duration: 3000}} />
+                    <Toaster containerClassName={"mt-[50px]"} position="top-right" toastOptions={{duration: 3000}} />
                         {children}
                 </ShoppingListProvider>
             </NextThemesProvider>
-        </NextUIProvider>
+        </HeroUIProvider>
     );
 }
