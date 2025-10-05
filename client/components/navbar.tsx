@@ -1,4 +1,5 @@
 import {
+    Button,
     Link,
     Navbar as NextUINavbar,
     NavbarBrand,
@@ -14,8 +15,9 @@ import {siteConfig} from "@/config/site";
 import NextLink from "next/link";
 import clsx from "clsx";
 
-import {ThemeSwitch} from "@/components/theme-switch";
 import {title} from "@/components/primitives";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
 export const Navbar = () => {
     return (
@@ -46,7 +48,12 @@ export const Navbar = () => {
             </NavbarContent>
 
             <NavbarContent className="  basis-1 pl-4" justify="end">
-                <ThemeSwitch/>
+                <NavbarItem >
+                    <Button as={NextLink} href="/shopping-list" variant="ghost">
+                        <FontAwesomeIcon icon={faShoppingCart} />
+                        <span className="hidden sm:inline ml-2">Carrinho de compras</span>
+                    </Button>
+                </NavbarItem>
                 <NavbarMenuToggle className="lg:hidden md:hidden"/>
             </NavbarContent>
 

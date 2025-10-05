@@ -16,17 +16,5 @@
     --color-success: #14B05C;
     --color-warning: #FFD54F;
     --color-danger: #FF8A65;
-    --color-dark-default: #1E1E1E;
-    --color-dark-primary: #EC407A;
-    --color-dark-secondary: #9575CD;
-    --color-dark-success: #14B05C;
-    --color-dark-warning: #FFD54F;
-    --color-dark-danger: #FF7043;
-    --color-dark-text: #FFFFFF;
-    --color-dark-muted: #BDBDBD;
-    --color-dark-surface: #2C2C2E;
-    --background-image-pink-radial: linear-gradient(133deg, rgba(254,217,230,1) 11%, rgba(252,228,236,1) 23%, rgba(255,244,248,1) 58%, rgba(252,228,236,1) 71%, rgba(254,217,230,1) 92%);
-    --background-image-pink-radial-dark: linear-gradient(133deg, rgba(27,5,65,1) 1%, rgba(12,4,27,1) 7%, rgba(11,9,15,1) 58%, rgba(12,4,27,1) 88%, rgba(27,5,65,1) 98%);
+    --background-image-pink-radial: linear-gradient(133deg, rgba(255,240,245,1) 11%, rgba(255,245,250,1) 23%, rgba(255,250,253,1) 58%, rgba(255,245,250,1) 71%, rgba(255,240,245,1) 92%);
 }
-
-@custom-variant dark (&:is(.dark *));

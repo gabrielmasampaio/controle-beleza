@@ -12,9 +12,5 @@ export const siteConfig = {
             label: "Contato",
             href: "/contact",
         },
-        {
-            label: "Minha Lista",
-            href: "/shopping-list",
-        },
     ],
 };

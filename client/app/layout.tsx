@@ -6,6 +6,9 @@ import { Providers } from "./providers";
 import { Navbar } from "@/components/navbar";
 import { Link } from "@heroui/react";
 import clsx from "clsx";
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+config.autoAddCss = false
 
 export const metadata: Metadata = {
 	title: {
@@ -32,10 +35,10 @@ export default function RootLayout({
 				className={clsx(
 					"min-h-screen bg-background bg-scroll font-sans antialiased",
 					fontSans.variable,
-					"bg-pink-radial dark:bg-pink-radial-dark",
+					"bg-pink-radial",
 				)}
 			>
-				<Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
+				<Providers>
 					<div className="relative flex flex-col min-h-screen">
 						<Navbar />
 						<main className="w-full max-w-[90vw] sm:max-w-[640px] md:max-w-3xl lg:max-w-5xl xl:max-w-7xl mx-auto pt-16 px-4 flex-grow">
