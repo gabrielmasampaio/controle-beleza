@@ -12,7 +12,7 @@ export default function ShoppingListPage() {
 
     return (
         <div className="flex flex-col gap-6">
-            <h1 className={title({color: "pink"})}>Lista de Compras</h1>
+            <h1 className={title({color: "pink"})}>Carrinho</h1>
             <p className={subtitle()}>
                 Você pode revisar os itens abaixo antes de entrar em contato e finalizar sua compra
             </p>

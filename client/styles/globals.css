@@ -16,5 +16,5 @@
     --color-success: #14B05C;
     --color-warning: #FFD54F;
     --color-danger: #FF8A65;
-    --background-image-pink-radial: linear-gradient(133deg, rgba(255,240,245,1) 11%, rgba(255,245,250,1) 23%, rgba(255,250,253,1) 58%, rgba(255,245,250,1) 71%, rgba(255,240,245,1) 92%);
+    --background-image-pink-radial: linear-gradient(133deg, rgba(255,240,245,1) 0%, rgba(255,255,255,1) 15%, rgba(255,255,255,1) 85%, rgba(255,240,245,1) 100%);
 }
