@@ -4,6 +4,11 @@ import React, {useEffect} from "react";
 import {
     Button,
     Input,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
     Pagination,
     Table,
     TableBody,
@@ -13,11 +18,6 @@ import {
     TableRow,
     Tooltip,
     useDisclosure,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
 } from "@heroui/react";
 import {DeleteIcon, EditIcon} from "@heroui/shared-icons";
 import {Category} from "@/types";
@@ -255,7 +255,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({isOpen, onOpenChan
     }, [category]);
 
     const handleSave = () => {
-        onSave({ ...category, name });
+        onSave({...category, name});
         onOpenChange();
     };
 

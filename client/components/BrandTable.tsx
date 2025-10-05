@@ -4,6 +4,11 @@ import React, {useEffect} from "react";
 import {
     Button,
     Input,
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
     Pagination,
     Table,
     TableBody,
@@ -13,11 +18,6 @@ import {
     TableRow,
     Tooltip,
     useDisclosure,
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
 } from "@heroui/react";
 import {DeleteIcon, EditIcon} from "@heroui/shared-icons";
 import {Brand} from "@/types";
@@ -255,7 +255,7 @@ const BrandFormModal: React.FC<BrandFormModalProps> = ({isOpen, onOpenChange, br
     }, [brand]);
 
     const handleSave = () => {
-        onSave({ ...brand, name });
+        onSave({...brand, name});
         onOpenChange();
     };
 
