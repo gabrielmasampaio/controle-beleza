@@ -3,8 +3,22 @@ import {getToken} from "@/app/lib/localStorage/auth";
 import {Product} from "@/types";
 import {fetchWithAuth} from "@/app/lib/api/fetchWithAuth";
 
-export async function getProducts(): Promise<Product[]> {
-    const res = await fetch(`${API_URL}/product`);
+interface GetProductsResponse {
+    products: Product[];
+    totalProducts: number;
+    page: number;
+    pages: number;
+}
+
+export async function getProducts(page: number = 1, limit: number = 20, searchTerm: string = ''): Promise<GetProductsResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (searchTerm) {
+        queryParams.append('searchTerm', searchTerm);
+    }
+
+    const res = await fetch(`${API_URL}/product?${queryParams.toString()}`);
     if (!res.ok) throw new Error("Erro ao buscar produtos");
     return res.json();
 }
