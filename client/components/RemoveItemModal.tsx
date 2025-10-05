@@ -1,16 +1,6 @@
 import {ShoppingItem} from "@/types";
-import {
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    Image,
-    Button,
-    Tooltip,
-} from "@heroui/react";
+import {Button, Image, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip,} from "@heroui/react";
 import React from "react";
-import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 
 interface RemoveItemModalProps {
@@ -39,7 +29,7 @@ export const RemoveItemModal: React.FC<RemoveItemModalProps> = ({item, isOpen, o
                                             width="100%"
                                             alt={item.name}
                                             className="w-full object-fit"
-                                            src={item.image?.trim() || DEFAULT_IMAGE}/>
+                                        />
                                     </div>
                                     <div className="flex flex-col w-1/2 ml-5 justify-between">
                                         Tem certeza de que quer remover {item.name} da sua lista de compras?

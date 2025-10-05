@@ -57,13 +57,23 @@ async function getAllProducts(filters) {
             if (filters.maxPrice) query.price.$lte = parseFloat(filters.maxPrice);
         }
 
-        if (filters.minStorage || filters.maxStorage) {
-            query.storage = {};
-            if (filters.minStorage) query.storage.$gte = parseInt(filters.minStorage);
-            if (filters.maxStorage) query.storage.$lte = parseInt(filters.maxStorage);
+        if (filters.minStock || filters.maxStock) {
+            query.stock = {};
+            if (filters.minStock) query.stock.$gte = parseInt(filters.minStock);
+            if (filters.maxStock) query.stock.$lte = parseInt(filters.maxStock);
         }
 
-        return await Product.find(query);
+        if (filters.category) {
+            query.categories = filters.category; // Filter by category ID
+        }
+
+        if (filters.brand) {
+            query.brand = filters.brand; // Filter by brand ID
+        }
+
+        return await Product.find(query)
+            .populate('categories') // Populate category details
+            .populate('brand'); // Populate brand details
     } catch (error) {
         throw new Error('Erro ao buscar produtos: ' + error.message);
     }
@@ -76,7 +86,9 @@ async function getAllProducts(filters) {
  */
 async function getProductById(id) {
     try {
-        const product = await Product.findById(id);
+        const product = await Product.findById(id)
+            .populate('categories')
+            .populate('brand');
         if (!product) {
             throw new Error('Produto não encontrado');
         }
@@ -108,5 +120,47 @@ module.exports = {
     updateProductById,
     getAllProducts,
     getProductById,
-    deleteProductById
+    deleteProductById,
+    countProductsByCategory,
+    countProductsByBrand,
+    removeCategoryFromProducts,
+    removeBrandFromProducts
 };
+
+async function countProductsByCategory(categoryId) {
+    try {
+        return await Product.countDocuments({ categories: categoryId });
+    } catch (error) {
+        throw new Error('Erro ao contar produtos por categoria: ' + error.message);
+    }
+}
+
+async function countProductsByBrand(brandId) {
+    try {
+        return await Product.countDocuments({ brand: brandId });
+    } catch (error) {
+        throw new Error('Erro ao contar produtos por marca: ' + error.message);
+    }
+}
+
+async function removeCategoryFromProducts(categoryId) {
+    try {
+        await Product.updateMany(
+            { categories: categoryId },
+            { $pull: { categories: categoryId } }
+        );
+    } catch (error) {
+        throw new Error('Erro ao remover categoria de produtos: ' + error.message);
+    }
+}
+
+async function removeBrandFromProducts(brandId) {
+    try {
+        await Product.updateMany(
+            { brand: brandId },
+            { $unset: { brand: 1 } } // Unset the brand field
+        );
+    } catch (error) {
+        throw new Error('Erro ao remover marca de produtos: ' + error.message);
+    }
+}

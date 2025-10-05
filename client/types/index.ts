@@ -6,3 +6,5 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 
 export * from "./product";
 export * from "./shopping-list";
+export * from "./category";
+export * from "./brand";

@@ -5,14 +5,16 @@ const productService = require('../services/product.service');
  */
 async function createProduct(req, res) {
     try {
-        const { name, description, price, storage, image } = req.body;
+        const { name, description, price, stock, image, categories, brand } = req.body;
 
         const product = await productService.createProduct({
             name,
             description,
             price,
-            storage,
+            stock,
             image,
+            categories,
+            brand,
         });
 
         return res.status(201).json(product);

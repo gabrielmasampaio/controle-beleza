@@ -2,9 +2,11 @@
 
 import LoginCard from "@/components/loginCard";
 import AdminTable from "@/components/adminTable";
+import CategoryTable from "@/components/CategoryTable";
+import BrandTable from "@/components/BrandTable";
 import {title} from "@/components/primitives";
 import React, {useEffect, useState} from "react";
-import {Spinner} from "@heroui/react";
+import {Spinner, Tabs, Tab} from "@heroui/react";
 import {validateToken} from "@/app/lib/api/auth";
 
 
@@ -34,14 +36,25 @@ export default function AdminPage() {
 
 	return (
 		<div>
-			{!logged ? <LoginCard className={"mt-auto"} onLoginSuccess={() => setLogged(true)}/>
-					: <>
+			{!logged ? <LoginCard onLoginSuccess={() => setLogged(true)}/>
+					: <div className="flex flex-col gap-4">
 						<h1 className={title()}>Painel de </h1>
 						<h1 className={title()}>
 							<p className={title({ color: "pink" })}>Admin</p>
 						</h1>
-						<AdminTable className={"mt-7"} />
-					</>
+
+						<Tabs aria-label="Admin Tabs" color="primary" variant="underlined">
+							<Tab key="products" title="Produtos">
+								<AdminTable className={"mt-7"} />
+							</Tab>
+							<Tab key="categories" title="Categorias">
+								<CategoryTable className={"mt-7"} />
+							</Tab>
+							<Tab key="brands" title="Marcas">
+								<BrandTable className={"mt-7"} />
+							</Tab>
+						</Tabs>
+					</div>
 			}
 		</div>
 	);
