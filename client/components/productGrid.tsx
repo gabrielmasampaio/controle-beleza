@@ -39,7 +39,7 @@ export default function ProductGrid() {
     const [searchTerm, setSearchTerm] = React.useState("");
     const [sortKey, setSortKey] = React.useState<SortKey>("default");
 
-    const [itemsPerPage, setItemsPerPage] = React.useState();
+    const [itemsPerPage, setItemsPerPage] = React.useState(25);
 
     useEffect(() => {
         fetchItems();
