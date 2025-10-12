@@ -47,16 +47,16 @@ export const ProductModal: React.FC<ProductModalProps> = ({product, isOpen, onOp
                         <ModalHeader className="flex flex-col gap-1">{product.name}</ModalHeader>
                         <ModalBody className="max-h-[80vh] overflow-y-auto">
                             <div className="flex flex-col sm:flex-row min-w-full gap-4">
-                                <div className="w-full sm:w-8/12">
+                                {product.images && <div className="w-full sm:w-8/12">
                                     <Image
                                         shadow="sm"
                                         radius="lg"
                                         width="100%"
                                         alt={product.name}
                                         className="w-full object-fit"
-                                        src={product.image?.trim() || DEFAULT_IMAGE}
+                                        src={product.images[0]?.trim() || DEFAULT_IMAGE}
                                     />
-                                </div>
+                                </div>}
 
                                 <div className="flex flex-col w-full sm:w-4/12 justify-evenly">
                                     {!product.description
