@@ -10,14 +10,14 @@ import {
     Button,
     Input,
 } from "@heroui/react";
-import { Product } from "@/types";
-import { ProductModal } from "@/components/productModal";
-import { createProduct, updateProduct } from "@/app/lib/api/product.api";
+import {Product} from "@/types";
+import {ProductModal} from "@/components/productModal";
+import {createProduct, updateProduct} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
 import {
     validatePrice,
     validateProductName,
-    validateStorage,
+    validateStock,
 } from "@/app/lib/text-format";
 
 interface ProductFormModalProps {
@@ -38,8 +38,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         name: "",
         description: "",
         price: 0,
-        storage: 0,
-        image: "",
+        stock: 0,
+        images: [],
     };
 
     const [form, setForm] = React.useState<Product>(product ?? defaultProduct);
@@ -81,9 +81,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         return !validatePrice(form.price.toString());
     }, [form.price]);
 
-    const isStorageInvalid = React.useMemo(() => {
-        return !validateStorage(form.storage.toString());
-    }, [form.storage]);
+    const isStockInvalid = React.useMemo(() => {
+        return !validateStock(form.stock.toString());
+    }, [form.stock]);
 
     function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
@@ -126,13 +126,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
                 const quality = file.size > 2097152 ? 0.5 : 0.7;
                 const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-                setForm((prev) => ({ ...prev, image: compressedBase64 }));
+                setForm((prev) => ({...prev, image: compressedBase64}));
             };
         };
     }
 
     const removeImage = () => {
-        setForm((prev) => ({ ...prev, image: "" }));
+        setForm((prev) => ({...prev, image: ""}));
     };
 
     return (
@@ -183,15 +183,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 <Input
                                     label="Estoque"
                                     type="number"
-                                    value={form.storage.toString()}
+                                    value={form.stock.toString()}
                                     placeholder="Quantidade em estoque"
                                     onValueChange={(val) =>
-                                        handleChange("storage", parseInt(val))
+                                        handleChange("stock", parseInt(val))
                                     }
-                                    isInvalid={isStorageInvalid}
-                                    color={isStorageInvalid ? "danger" : "default"}
+                                    isInvalid={isStockInvalid}
+                                    color={isStockInvalid ? "danger" : "default"}
                                     errorMessage={
-                                        isStorageInvalid && "Estoque deve ser um número inteiro positivo"
+                                        isStockInvalid && "Estoque deve ser um número inteiro positivo"
                                     }
                                 />
 
@@ -216,22 +216,24 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         />
                                     </div>
 
-                                    {form.image && (
-                                        <div className="flex flex-col items-start gap-2">
-                                            <img
-                                                src={form.image}
-                                                alt="Prévia da imagem"
-                                                className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
-                                            />
-                                            <Button
-                                                size="sm"
-                                                color="danger"
-                                                variant="light"
-                                                onPress={removeImage}
-                                            >
-                                                Remover imagem
-                                            </Button>
-                                        </div>
+                                    {form.images && form.images.length > 0 && (
+                                        form.images.map((image, index) => (
+                                            <div key={index} className="flex flex-col items-start gap-2">
+                                                <img
+                                                    src={image}
+                                                    alt="Prévia da imagem"
+                                                    className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
+                                                />
+                                                <Button
+                                                    size="sm"
+                                                    color="danger"
+                                                    variant="light"
+                                                    onPress={removeImage}
+                                                >
+                                                    Remover imagem
+                                                </Button>
+                                            </div>
+                                        ))
                                     )}
                                 </div>
                             </ModalBody>
