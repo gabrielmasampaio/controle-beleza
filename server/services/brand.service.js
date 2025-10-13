@@ -5,31 +5,16 @@ async function createBrand(data) {
         const newBrand = new Brand(data);
         return await newBrand.save();
     } catch (error) {
+        if (error.code === 11000) {
+            throw new Error('Já existe uma marca com este nome.');
+        }
         throw new Error('Erro ao criar marca: ' + error.message);
     }
 }
 
-async function getAllBrands(filters, page = 1, limit = 20) {
+async function getAllBrands() {
     try {
-        const query = {};
-        const options = {
-            skip: (page - 1) * limit,
-            limit: limit,
-        };
-
-        if (filters.searchTerm) {
-            query.name = { $regex: filters.searchTerm, $options: 'i' };
-        }
-
-        const brands = await Brand.find(query, null, options);
-        const totalBrands = await Brand.countDocuments(query);
-
-        return {
-            brands,
-            totalBrands,
-            page,
-            pages: Math.ceil(totalBrands / limit)
-        };
+        return await Brand.find();
     } catch (error) {
         throw new Error('Erro ao buscar marcas: ' + error.message);
     }

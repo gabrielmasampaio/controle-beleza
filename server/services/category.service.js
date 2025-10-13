@@ -5,31 +5,16 @@ async function createCategory(data) {
         const newCategory = new Category(data);
         return await newCategory.save();
     } catch (error) {
+        if (error.code === 11000) {
+            throw new Error('Já existe uma categoria com este nome.');
+        }
         throw new Error('Erro ao criar categoria: ' + error.message);
     }
 }
 
-async function getAllCategories(filters, page = 1, limit = 20) {
+async function getAllCategories() {
     try {
-        const query = {};
-        const options = {
-            skip: (page - 1) * limit,
-            limit: limit,
-        };
-
-        if (filters.searchTerm) {
-            query.name = { $regex: filters.searchTerm, $options: 'i' };
-        }
-
-        const categories = await Category.find(query, null, options);
-        const totalCategories = await Category.countDocuments(query);
-
-        return {
-            categories,
-            totalCategories,
-            page,
-            pages: Math.ceil(totalCategories / limit)
-        };
+        return await Category.find();
     } catch (error) {
         throw new Error('Erro ao buscar categorias: ' + error.message);
     }

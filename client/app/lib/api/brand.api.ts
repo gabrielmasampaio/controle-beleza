@@ -3,22 +3,8 @@ import { getToken } from "@/app/lib/localStorage/auth";
 import { Brand } from "@/types";
 import { fetchWithAuth } from "@/app/lib/api/fetchWithAuth";
 
-interface GetBrandsResponse {
-    brands: Brand[];
-    totalBrands: number;
-    page: number;
-    pages: number;
-}
-
-export async function getBrands(page: number = 1, limit: number = 20, searchTerm: string = ''): Promise<GetBrandsResponse> {
-    const queryParams = new URLSearchParams();
-    queryParams.append('page', page.toString());
-    queryParams.append('limit', limit.toString());
-    if (searchTerm) {
-        queryParams.append('searchTerm', searchTerm);
-    }
-
-    const res = await fetch(`${API_URL}/brand?${queryParams.toString()}`);
+export async function getBrands(): Promise<Brand[]> {
+    const res = await fetch(`${API_URL}/brand`);
     if (!res.ok) throw new Error("Erro ao buscar marcas");
     return res.json();
 }

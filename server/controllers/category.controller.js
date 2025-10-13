@@ -8,15 +8,17 @@ async function createCategory(req, res) {
         return res.status(201).json(category);
     } catch (error) {
         console.error('Erro no controller de categoria:', error);
+        if (error.message === 'Já existe uma categoria com este nome.') {
+            return res.status(409).json({ message: error.message }); // 409 Conflict
+        }
         return res.status(500).json({ message: error.message });
     }
 }
 
 async function getAllCategories(req, res) {
     try {
-        const { page, limit, searchTerm } = req.query;
-        const categoriesData = await categoryService.getAllCategories({ searchTerm }, parseInt(page), parseInt(limit));
-        return res.status(200).json(categoriesData);
+        const categories = await categoryService.getAllCategories();
+        return res.status(200).json(categories);
     } catch (error) {
         console.error('Erro ao buscar categorias:', error);
         return res.status(500).json({ message: error.message });

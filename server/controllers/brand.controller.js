@@ -8,15 +8,17 @@ async function createBrand(req, res) {
         return res.status(201).json(brand);
     } catch (error) {
         console.error('Erro no controller de marca:', error);
+        if (error.message === 'Já existe uma marca com este nome.') {
+            return res.status(409).json({ message: error.message }); // 409 Conflict
+        }
         return res.status(500).json({ message: error.message });
     }
 }
 
 async function getAllBrands(req, res) {
     try {
-        const { page, limit, searchTerm } = req.query;
-        const brandsData = await brandService.getAllBrands({ searchTerm }, parseInt(page), parseInt(limit));
-        return res.status(200).json(brandsData);
+        const brands = await brandService.getAllBrands();
+        return res.status(200).json(brands);
     } catch (error) {
         console.error('Erro ao buscar marcas:', error);
         return res.status(500).json({ message: error.message });

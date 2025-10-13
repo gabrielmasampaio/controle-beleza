@@ -52,8 +52,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     const [form, setForm] = React.useState<Product>(product ?? defaultProduct);
 
-    const {data: brandsResponse} = useSWR("brands", getBrands);
-    const { data: categoriesResponse } = useSWR("categories", getCategories);
+    const {data: brands} = useSWR("brands", getBrands);
+    const { data: categories } = useSWR("categories", getCategories);
 
     const availabilityOptions = ["A pronta entrega", "A Caminho", "Somente Encomenda"];
 
@@ -71,6 +71,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     };
 
     const handleSave = async () => {
+        console.log("Form data before saving:", form);
         try {
             const saved = form._id
                 ? await updateProduct(form)
@@ -217,7 +218,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     selectedKeys={form.brands}
                                     onSelectionChange={(keys) => handleChange("brands", Array.from(keys).map(String))}
                                 >
-                                    {brandsResponse?.brands?.map((brand) => (
+                                    {brands?.map((brand) => (
                                         <SelectItem key={brand._id} >
                                             {brand.name}
                                         </SelectItem>
@@ -230,7 +231,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     selectedKeys={form.categories}
                                     onSelectionChange={(keys) => handleChange("categories", Array.from(keys).map(String))}
                                 >
-                                    {categoriesResponse?.categories?.map((category) => (
+                                    {categories?.map((category) => (
                                         <SelectItem key={category._id} >
                                             {category.name}
                                         </SelectItem>

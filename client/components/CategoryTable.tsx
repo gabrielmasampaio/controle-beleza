@@ -4,7 +4,6 @@ import React from "react";
 import {
     Button,
     Input,
-    Pagination,
     Spinner,
     Table,
     TableBody,
@@ -22,7 +21,6 @@ import {createCategory, deleteCategory, getCategories, updateCategory} from "@/a
 import toast from "react-hot-toast";
 import {ConfirmationModal} from "@/components/ConfirmationModal";
 import useSWR from "swr";
-import {getKeyValue} from "@heroui/react";
 import {CategoryFormModal} from "@/components/CategoryFormModal";
 
 interface CategoryTableProps {
@@ -37,21 +35,13 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
     const [linkedProductsCount, setLinkedProductsCount] = React.useState<number>(0);
     const {isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose} = useDisclosure();
 
-    const [page, setPage] = React.useState(1);
-    const [searchTerm, setSearchTerm] = React.useState("");
-    const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
-
-    const {data, isLoading, mutate} = useSWR(
-        `getCategories?page=${page}&searchTerm=${searchTerm}`,
-        () => getCategories(page, 8, searchTerm),
+    const {data: categories, isLoading, mutate} = useSWR(
+        "categories",
+        getCategories,
         {keepPreviousData: true}
     );
 
-    const pages = React.useMemo(() => {
-        return data?.pages ? data.pages : 0;
-    }, [data?.pages]);
-
-    const loadingState = isLoading || data === undefined ? "loading" : "idle";
+    const loadingState = isLoading || categories === undefined ? "loading" : "idle";
 
     const renderCell = (category: Category, columnKey: React.Key) => {
         const cellValue = category[columnKey as keyof Category];
@@ -126,28 +116,16 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
                 : await createCategory(category);
             toast.success("Categoria salva com sucesso");
             mutate();
-            setHighlightedId(saved._id ?? null);
-            setTimeout(() => setHighlightedId(null), 3000);
             onOpenChange();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Erro ao salvar categoria", err);
-            toast.error("Erro ao salvar categoria");
+            toast.error(err.message || "Erro ao salvar categoria");
         }
     };
 
     return (
         <div className={`flex flex-col gap-3 w-full ${className}`}>
-            <div className="flex justify-between items-center px-2 gap-2">
-                <Input
-                    size="sm"
-                    isClearable
-                    className="max-w-[200px]"
-                    label="Buscar"
-                    value={searchTerm}
-                    startContent={<SearchIcon size={5}/>}
-                    onValueChange={setSearchTerm}
-                    onClear={() => setSearchTerm("")}
-                />
+            <div className="flex justify-end items-center px-2 gap-2">
                 <Button
                     color="secondary"
                     className="min-h-full"
@@ -163,33 +141,18 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
 
             <Table
                 aria-label="Tabela de categorias"
-                bottomContent={
-                    pages > 0 ? (
-                        <div className="flex w-full justify-center">
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
-                                color="secondary"
-                                page={page}
-                                total={pages}
-                                onChange={setPage}
-                            />
-                        </div>
-                    ) : null
-                }
             >
                 <TableHeader>
                     <TableColumn key="name">Nome</TableColumn>
                     <TableColumn key="actions">Ações</TableColumn>
                 </TableHeader>
                 <TableBody
-                    items={data?.categories ?? []}
+                    items={categories ?? []}
                     loadingContent={<Spinner/>}
                     loadingState={loadingState}
                 >
                     {(item) => (
-                        <TableRow key={item?._id} className={item?._id === highlightedId ? "text-warning transition duration-75" : ""}>
+                        <TableRow key={item?._id}>
                             {(columnKey) => (
                                 <TableCell>{renderCell(item, columnKey)}</TableCell>
                             )}
