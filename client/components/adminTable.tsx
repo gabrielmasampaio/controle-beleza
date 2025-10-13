@@ -1,10 +1,10 @@
-'use client';
-
-import React, {useEffect} from "react";
+import React from "react";
 import {
     Button,
     Input,
-    Pagination,
+    Pagination, Spinner,
+    Select,
+    SelectItem,
     Table,
     TableBody,
     TableCell,
@@ -23,12 +23,13 @@ import {RemoveItemModal} from "@/components/RemoveItemModal";
 import {SearchIcon} from "@/components/icons";
 import {deleteProduct, getProducts} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
 interface AdminTableProps {
     className?: string;
 }
 
-export default function AdminTable({className = ""}: AdminTableProps) {
+export default function AdminTable({className = ""}: Readonly<AdminTableProps>) {
     const [selectedItem, setSelectedItem] = React.useState<Product>();
     const {isOpen, onOpen, onOpenChange} = useDisclosure();
     const {
@@ -37,37 +38,78 @@ export default function AdminTable({className = ""}: AdminTableProps) {
         onOpenChange: onRemoveItemOpenChange,
     } = useDisclosure();
 
-    const [products, setProducts] = React.useState<Product[]>([]);
     const [page, setPage] = React.useState(1);
-    const rowsPerPage = 8;
-    const pages = Math.ceil(products.length / rowsPerPage);
+    const [itemsPerPage, setItemsPerPage] = React.useState(10);
     const [searchTerm, setSearchTerm] = React.useState("");
+
+    const {data, isLoading, mutate} = useSWR(
+        `getProducts?page=${page}&limit=${itemsPerPage}&searchTerm=${searchTerm}`,
+        () => getProducts(page, itemsPerPage, searchTerm),
+        {keepPreviousData: true}
+    );
+
+    const pages = React.useMemo(() => {
+        return data?.pages ? data.pages : 0;
+    }, [data?.pages]);
+
+    const loadingState = isLoading || data === undefined ? "loading" : "idle";
+
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
 
-    const filteredItems = React.useMemo(() => {
-        return products.filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [products, searchTerm]);
+    const renderCell = (product: Product, columnKey: React.Key) => {
+        const cellValue = product[columnKey as keyof Product];
 
-    const pageProducts = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        return filteredItems.slice(start, start + rowsPerPage);
-    }, [page, filteredItems]);
-
-    useEffect(() => {
-        async function fetchProducts() {
-            try {
-                const produtos = await getProducts();
-                setProducts(produtos);
-                setPage(1);
-            } catch (err) {
-                console.error("Erro ao buscar produtos:", err);
-            }
+        switch (columnKey) {
+            case "name":
+                return (
+                    <Tooltip
+                        className="cursor-pointer"
+                        onClick={() => handleOpenProduct(product)}
+                        content={
+                            <div className="text-xs flex items-center gap-2">
+                                <EyeIcon/> ver produto
+                            </div>
+                        }
+                    >
+                        <User
+                            className="hover:opacity-50"
+                            avatarProps={{
+                                radius: "lg",
+                                src: product.images && product.images.length > 0 ? product.images[0] : "",
+                            }}
+                            name={cellValue as string}
+                        >
+                            {product.description}
+                        </User>
+                    </Tooltip>
+                );
+            case "price":
+                return formatPrice(cellValue as number);
+            case "actions":
+                return (
+                    <div className="flex items-center justify-center gap-4">
+                        <Tooltip content="Editar Produto">
+                        <span
+                            className="text-lg cursor-pointer active:opacity-50"
+                            onClick={() => handleOpenProduct(product)}
+                        >
+                          <EditIcon />
+                        </span>
+                        </Tooltip>
+                        <Tooltip color="danger" content="Remover Produto">
+                        <span
+                            onClick={() => handleDelete(product)}
+                            className="text-lg text-red-500 cursor-pointer active:opacity-50"
+                        >
+                          <DeleteIcon />
+                        </span>
+                        </Tooltip>
+                    </div>
+                );
+            default:
+                return cellValue as string;
         }
-
-        fetchProducts();
-    }, []);
+    };
 
     const handleOpenProduct = (item: Product) => {
         setSelectedItem(item);
@@ -81,18 +123,13 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
     const onDeleteItem = async (itemId: string) => {
         try {
-            deleteProduct(itemId)
-                .then(() => {
-                    toast.success("Produto removido");
-                })
-                .catch((err) => {
-                    console.log("Error deleting product", err);
-                    toast.error("Erro ao deletar produto");
-                });
-            setProducts((prev) => prev.filter((i) => i._id !== selectedItem?._id));
+            await deleteProduct(itemId);
+            toast.success("Produto removido");
+            mutate(); // Revalidate the data
             onRemoveItemOpenChange();
         } catch (err) {
             console.error("Erro ao deletar:", err);
+            toast.error("Erro ao deletar produto");
         }
     };
 
@@ -106,9 +143,24 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                     label="Buscar"
                     value={searchTerm}
                     startContent={<SearchIcon size={5}/>}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onValueChange={setSearchTerm}
                     onClear={() => setSearchTerm("")}
                 />
+                <Select
+                    size="sm"
+                    className="max-w-[150px]"
+                    label="Itens por página"
+                    defaultSelectedKeys={[itemsPerPage.toString()]}
+                    onSelectionChange={(keys) => {
+                        const newItemsPerPage = Number(Array.from(keys)[0]);
+                        setItemsPerPage(newItemsPerPage);
+                        setPage(1);
+                    }}
+                >
+                    <SelectItem key="10">10</SelectItem>
+                    <SelectItem key="15">15</SelectItem>
+                    <SelectItem key="25">25</SelectItem>
+                </Select>
                 <Button
                     color="secondary"
                     className="min-h-full"
@@ -124,9 +176,8 @@ export default function AdminTable({className = ""}: AdminTableProps) {
 
             <Table
                 aria-label="Tabela de produtos"
-                className="w-full table-fixed"
                 bottomContent={
-                    pages > 1 && (
+                    pages > 0 ? (
                         <div className="flex w-full justify-center">
                             <Pagination
                                 isCompact
@@ -135,73 +186,34 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                                 color="secondary"
                                 page={page}
                                 total={pages}
-                                onChange={setPage}
+                                onChange={(p) => setPage(p)}
                             />
                         </div>
-                    )
+                    ) : null
                 }
             >
                 <TableHeader>
-                    <TableColumn className="w-1/3 text-xs sm:text-base">Produto</TableColumn>
-                    <TableColumn className="w-1/3 text-xs sm:text-base">Preço</TableColumn>
-                    <TableColumn className="w-1/3 text-xs sm:text-base">Ações</TableColumn>
+                    <TableColumn key="name">Produto</TableColumn>
+                    <TableColumn key="price">Preço</TableColumn>
+                    <TableColumn key="stock">Estoque</TableColumn>
+                    <TableColumn key="actions">Ações</TableColumn>
                 </TableHeader>
-
-                <TableBody emptyContent={"Nenhum produto encontrado."}>
-                    {pageProducts.map((product) => (
+                <TableBody
+                    items={data?.products ?? []}
+                    loadingContent={<Spinner/>}
+                    loadingState={loadingState}
+                >
+                    {(item) => (
                         <TableRow
-                            key={product._id}
-                            className={
-                                product._id === highlightedId ? "text-warning transition duration-75" : ""
-                            }
-                        >
-                            <TableCell className="flex items-center gap-1 text-xs sm:text-base">
-                                <Tooltip
-                                    className="cursor-pointer"
-                                    onClick={() => handleOpenProduct(product)}
-                                    content={
-                                        <div className="text-xs flex items-center gap-2">
-                                            <EyeIcon/> ver produto
-                                        </div>
-                                    }
-                                >
-                                    <User
-                                        className="hover:opacity-50"
-                                        avatarProps={{radius: "lg", src: product.image}}
-                                        name={product.name}
-                                    >
-                                        {product.description}
-                                    </User>
-                                </Tooltip>
-                            </TableCell>
-
-                            <TableCell className="text-left text-xs sm:text-base">
-                                {formatPrice(product.price)}
-                            </TableCell>
-
-                            <TableCell className="text-xs sm:text-base">
-                                <div className="flex items-center justify-center gap-4">
-                                    <Tooltip content="Editar Produto">
-                    <span
-                        className="text-lg cursor-pointer active:opacity-50"
-                        onClick={() => handleOpenProduct(product)}
-                    >
-                      <EditIcon/>
-                    </span>
-                                    </Tooltip>
-
-                                    <Tooltip color="danger" content="Remover Produto">
-                    <span
-                        onClick={() => handleDelete(product)}
-                        className="text-lg text-red-500 cursor-pointer active:opacity-50"
-                    >
-                      <DeleteIcon/>
-                    </span>
-                                    </Tooltip>
-                                </div>
-                            </TableCell>
+                            key={item?._id}
+                            className={item?._id === highlightedId ? "text-warning transition duration-75" : ""}>
+                            {(columnKey) => (
+                                <TableCell>
+                                    {renderCell(item, columnKey)}
+                                </TableCell>
+                            )}
                         </TableRow>
-                    ))}
+                    )}
                 </TableBody>
             </Table>
 
@@ -210,19 +222,9 @@ export default function AdminTable({className = ""}: AdminTableProps) {
                 onOpenChange={onOpenChange}
                 product={selectedItem}
                 onSave={(savedProduct) => {
-                    setProducts((prev) => {
-                        const index = prev.findIndex((item) => item._id === savedProduct._id);
-                        setHighlightedId(savedProduct._id ?? null);
-                        setTimeout(() => setHighlightedId(null), 3000);
-
-                        if (index !== -1) {
-                            const updated = [...prev];
-                            updated[index] = savedProduct;
-                            return updated;
-                        } else {
-                            return [savedProduct, ...prev];
-                        }
-                    });
+                    mutate(); // Revalidate the data
+                    setHighlightedId(savedProduct._id ?? null);
+                    setTimeout(() => setHighlightedId(null), 3000);
                 }}
             />
 

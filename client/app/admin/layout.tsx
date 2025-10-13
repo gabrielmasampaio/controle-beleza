@@ -4,8 +4,8 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-            <div className="inline-block max-w-lg text-center justify-center">
+        <section className="flex flex-col justify-center gap-4 py-4 md:py-10">
+            <div className="inline-block min-w-max text-center justify-center">
                 {children}
             </div>
         </section>

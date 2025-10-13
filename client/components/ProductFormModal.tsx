@@ -126,13 +126,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
                 const quality = file.size > 2097152 ? 0.5 : 0.7;
                 const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-                setForm((prev) => ({...prev, image: compressedBase64}));
+                setForm((prev) => ({...prev, images: [...(prev.images ?? []), compressedBase64]}));
             };
         };
     }
 
-    const removeImage = () => {
-        setForm((prev) => ({...prev, image: ""}));
+    const removeImage = (index: number) => {
+        setForm((prev) => ({
+            ...prev,
+            images: prev.images?.filter((_, i) => i !== index) ?? [],
+        }));
     };
 
     return (
@@ -228,7 +231,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                     size="sm"
                                                     color="danger"
                                                     variant="light"
-                                                    onPress={removeImage}
+                                                    onPress={() => removeImage(index)}
                                                 >
                                                     Remover imagem
                                                 </Button>
