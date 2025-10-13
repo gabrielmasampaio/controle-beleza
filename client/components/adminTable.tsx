@@ -174,8 +174,9 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                 </Button>
             </div>
 
-            <Table
-                aria-label="Tabela de produtos"
+            <div className="overflow-x-auto">
+                <Table
+                    aria-label="Tabela de produtos"
                 bottomContent={
                     pages > 0 ? (
                         <div className="flex w-full justify-center">
@@ -216,6 +217,7 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                     )}
                 </TableBody>
             </Table>
+            </div>
 
             <ProductFormModal
                 isOpen={isOpen}
