@@ -3,8 +3,22 @@ import { getToken } from "@/app/lib/localStorage/auth";
 import { Category } from "@/types";
 import { fetchWithAuth } from "@/app/lib/api/fetchWithAuth";
 
-export async function getCategories(): Promise<Category[]> {
-    const res = await fetch(`${API_URL}/category`);
+interface GetCategoriesResponse {
+    categories: Category[];
+    totalCategories: number;
+    page: number;
+    pages: number;
+}
+
+export async function getCategories(page: number = 1, limit: number = 20, searchTerm: string = ''): Promise<GetCategoriesResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('page', page.toString());
+    queryParams.append('limit', limit.toString());
+    if (searchTerm) {
+        queryParams.append('searchTerm', searchTerm);
+    }
+
+    const res = await fetch(`${API_URL}/category?${queryParams.toString()}`);
     if (!res.ok) throw new Error("Erro ao buscar categorias");
     return res.json();
 }

@@ -47,7 +47,7 @@ async function getAllProducts(filters, page = 1, limit = 20) {
         const options = {
             skip: (page - 1) * limit,
             limit: limit,
-            populate: ['categories', 'brand']
+            populate: ['categories', 'brands']
         };
 
         // Wildcard search
@@ -67,7 +67,7 @@ async function getAllProducts(filters, page = 1, limit = 20) {
             // Search in brands by name
             const matchingBrands = await Brand.find({ name: searchRegex }).select('_id');
             if (matchingBrands.length > 0) {
-                orConditions.push({ brand: { $in: matchingBrands.map(b => b._id) } });
+                orConditions.push({ brands: { $in: matchingBrands.map(b => b._id) } });
             }
 
             query.$or = orConditions;
@@ -93,12 +93,12 @@ async function getAllProducts(filters, page = 1, limit = 20) {
             query.categories = filters.category; // Filter by category ID
         }
 
-        if (filters.brand) {
-            query.brand = filters.brand; // Filter by brand ID
+        if (filters.brands) {
+            query.brands = filters.brands; // Filter by brand ID
         }
 
-        if (filters.disponibilidade) {
-            query.disponibilidade = filters.disponibilidade;
+        if (filters.availability) {
+            query.availability = filters.availability;
         }
 
         const products = await Product.find(query, null, options);
@@ -124,7 +124,7 @@ async function getProductById(id) {
     try {
         const product = await Product.findById(id)
             .populate('categories')
-            .populate('brand');
+            .populate('brands');
         if (!product) {
             throw new Error('Produto não encontrado');
         }
@@ -173,7 +173,7 @@ async function countProductsByCategory(categoryId) {
 
 async function countProductsByBrand(brandId) {
     try {
-        return await Product.countDocuments({ brand: brandId });
+        return await Product.countDocuments({ brands: brandId });
     } catch (error) {
         throw new Error('Erro ao contar produtos por marca: ' + error.message);
     }
@@ -193,8 +193,8 @@ async function removeCategoryFromProducts(categoryId) {
 async function removeBrandFromProducts(brandId) {
     try {
         await Product.updateMany(
-            { brand: brandId },
-            { $unset: { brand: 1 } } // Unset the brand field
+            { brands: brandId },
+            { $pull: { brands: brandId } } // Unset the brand field
         );
     } catch (error) {
         throw new Error('Erro ao remover marca de produtos: ' + error.message);

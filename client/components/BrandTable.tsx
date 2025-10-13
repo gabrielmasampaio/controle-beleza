@@ -1,15 +1,11 @@
 'use client';
 
-import React, {useEffect} from "react";
+import React from "react";
 import {
     Button,
     Input,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
     Pagination,
+    Spinner,
     Table,
     TableBody,
     TableCell,
@@ -25,6 +21,9 @@ import {SearchIcon} from "@/components/icons";
 import {createBrand, deleteBrand, getBrands, updateBrand} from "@/app/lib/api/brand.api";
 import toast from "react-hot-toast";
 import {ConfirmationModal} from "@/components/ConfirmationModal";
+import useSWR from "swr";
+import {getKeyValue} from "@heroui/react";
+import {BrandFormModal} from "@/components/BrandFormModal";
 
 interface BrandTableProps {
     className?: string;
@@ -38,37 +37,54 @@ export default function BrandTable({className = ""}: BrandTableProps) {
     const [linkedProductsCount, setLinkedProductsCount] = React.useState<number>(0);
     const {isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose} = useDisclosure();
 
-    const [brands, setBrands] = React.useState<Brand[]>([]);
     const [page, setPage] = React.useState(1);
-    const rowsPerPage = 8;
-    const pages = Math.ceil(brands.length / rowsPerPage);
     const [searchTerm, setSearchTerm] = React.useState("");
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
 
-    const filteredItems = React.useMemo(() => {
-        return brands.filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [brands, searchTerm]);
+    const {data, isLoading, mutate} = useSWR(
+        `getBrands?page=${page}&searchTerm=${searchTerm}`,
+        () => getBrands(page, 8, searchTerm),
+        {keepPreviousData: true}
+    );
 
-    const pageBrands = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        return filteredItems.slice(start, start + rowsPerPage);
-    }, [page, filteredItems]);
+    const pages = React.useMemo(() => {
+        return data?.pages ? data.pages : 0;
+    }, [data?.pages]);
 
-    useEffect(() => {
-        async function fetchBrands() {
-            try {
-                const fetchedBrands = await getBrands();
-                setBrands(fetchedBrands);
-                setPage(1);
-            } catch (err) {
-                console.error("Erro ao buscar marcas:", err);
-            }
+    const loadingState = isLoading || data === undefined ? "loading" : "idle";
+
+    const renderCell = (brand: Brand, columnKey: React.Key) => {
+        const cellValue = brand[columnKey as keyof Brand];
+
+        switch (columnKey) {
+            case "name":
+                return cellValue;
+            case "actions":
+                return (
+                    <div className="flex items-center justify-center gap-4">
+                        <Tooltip content="Editar Marca">
+                            <span
+                                className="text-lg cursor-pointer active:opacity-50"
+                                onClick={() => handleOpenBrand(brand)}
+                            >
+                                <EditIcon/>
+                            </span>
+                        </Tooltip>
+
+                        <Tooltip color="danger" content="Remover Marca">
+                            <span
+                                onClick={() => handleDeleteClick(brand)}
+                                className="text-lg text-red-500 cursor-pointer active:opacity-50"
+                            >
+                                <DeleteIcon/>
+                            </span>
+                        </Tooltip>
+                    </div>
+                );
+            default:
+                return cellValue;
         }
-
-        fetchBrands();
-    }, []);
+    };
 
     const handleOpenBrand = (item: Brand) => {
         setSelectedItem(item);
@@ -91,10 +107,9 @@ export default function BrandTable({className = ""}: BrandTableProps) {
     const handleConfirmDelete = async () => {
         if (!brandToDelete?._id) return;
         try {
-            // Always pass forceDelete=true when confirming deletion
             await deleteBrand(brandToDelete._id, true);
-            toast.success("Marca removida"); // Simplified toast message
-            setBrands((prev) => prev.filter((i) => i._id !== brandToDelete._id));
+            toast.success("Marca removida");
+            mutate();
             onConfirmClose();
             setBrandToDelete(null);
             setLinkedProductsCount(0);
@@ -110,19 +125,9 @@ export default function BrandTable({className = ""}: BrandTableProps) {
                 ? await updateBrand(brand)
                 : await createBrand(brand);
             toast.success("Marca salva com sucesso");
-            setBrands((prev) => {
-                const index = prev.findIndex((item) => item._id === saved._id);
-                setHighlightedId(saved._id ?? null);
-                setTimeout(() => setHighlightedId(null), 3000);
-
-                if (index !== -1) {
-                    const updated = [...prev];
-                    updated[index] = saved;
-                    return updated;
-                } else {
-                    return [saved, ...prev];
-                }
-            });
+            mutate();
+            setHighlightedId(saved._id ?? null);
+            setTimeout(() => setHighlightedId(null), 3000);
             onOpenChange();
         } catch (err) {
             console.error("Erro ao salvar marca", err);
@@ -140,7 +145,7 @@ export default function BrandTable({className = ""}: BrandTableProps) {
                     label="Buscar"
                     value={searchTerm}
                     startContent={<SearchIcon size={5}/>}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onValueChange={setSearchTerm}
                     onClear={() => setSearchTerm("")}
                 />
                 <Button
@@ -158,9 +163,8 @@ export default function BrandTable({className = ""}: BrandTableProps) {
 
             <Table
                 aria-label="Tabela de marcas"
-                className="w-full table-fixed"
                 bottomContent={
-                    pages > 1 && (
+                    pages > 0 ? (
                         <div className="flex w-full justify-center">
                             <Pagination
                                 isCompact
@@ -172,49 +176,25 @@ export default function BrandTable({className = ""}: BrandTableProps) {
                                 onChange={setPage}
                             />
                         </div>
-                    )
+                    ) : null
                 }
             >
                 <TableHeader>
-                    <TableColumn className="w-1/2 text-xs sm:text-base">Nome</TableColumn>
-                    <TableColumn className="w-1/2 text-xs sm:text-base">Ações</TableColumn>
+                    <TableColumn key="name">Nome</TableColumn>
+                    <TableColumn key="actions">Ações</TableColumn>
                 </TableHeader>
-
-                <TableBody emptyContent={"Nenhuma marca encontrada."}>
-                    {pageBrands.map((brand) => (
-                        <TableRow
-                            key={brand._id}
-                            className={
-                                brand._id === highlightedId ? "text-warning transition duration-75" : ""
-                            }
-                        >
-                            <TableCell className="flex items-center gap-1 text-xs sm:text-base">
-                                {brand.name}
-                            </TableCell>
-
-                            <TableCell className="text-xs sm:text-base">
-                                <div className="flex items-center justify-center gap-4">
-                                    <Tooltip content="Editar Marca">
-                                        <span
-                                            className="text-lg cursor-pointer active:opacity-50"
-                                            onClick={() => handleOpenBrand(brand)}
-                                        >
-                                            <EditIcon/>
-                                        </span>
-                                    </Tooltip>
-
-                                    <Tooltip color="danger" content="Remover Marca">
-                                        <span
-                                            onClick={() => handleDeleteClick(brand)}
-                                            className="text-lg text-red-500 cursor-pointer active:opacity-50"
-                                        >
-                                            <DeleteIcon/>
-                                        </span>
-                                    </Tooltip>
-                                </div>
-                            </TableCell>
+                <TableBody
+                    items={data?.brands ?? []}
+                    loadingContent={<Spinner/>}
+                    loadingState={loadingState}
+                >
+                    {(item) => (
+                        <TableRow key={item?._id} className={item?._id === highlightedId ? "text-warning transition duration-75" : ""}>
+                            {(columnKey) => (
+                                <TableCell>{renderCell(item, columnKey)}</TableCell>
+                            )}
                         </TableRow>
-                    ))}
+                    )}
                 </TableBody>
             </Table>
 
@@ -239,50 +219,3 @@ export default function BrandTable({className = ""}: BrandTableProps) {
         </div>
     );
 }
-
-interface BrandFormModalProps {
-    isOpen: boolean;
-    onOpenChange: () => void;
-    brand?: Brand;
-    onSave: (brand: Brand) => void;
-}
-
-const BrandFormModal: React.FC<BrandFormModalProps> = ({isOpen, onOpenChange, brand, onSave}) => {
-    const [name, setName] = React.useState(brand?.name || "");
-
-    React.useEffect(() => {
-        setName(brand?.name || "");
-    }, [brand]);
-
-    const handleSave = () => {
-        onSave({...brand, name});
-        onOpenChange();
-    };
-
-    return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>{brand ? "Editar Marca" : "Nova Marca"}</ModalHeader>
-                        <ModalBody>
-                            <Input
-                                label="Nome"
-                                value={name}
-                                onValueChange={setName}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                Cancelar
-                            </Button>
-                            <Button color="primary" onPress={handleSave}>
-                                Salvar
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    );
-};

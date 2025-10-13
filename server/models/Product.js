@@ -7,11 +7,11 @@ const productSchema = new mongoose.Schema({
         storage: { type: Number, required: true },
         images: [String], // array of base64 strings
         categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-        brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
-        disponibilidade: {
+        brands: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }],
+        availability: {
             type: String,
-            enum: ['Pronta entrega', 'Sob encomenda', 'Disponível em breve'],
-            default: 'Pronta entrega'
+            enum: ['A pronta entrega', 'A Caminho', 'Somente Encomenda'],
+            default: 'A pronta entrega'
         },
     }, {
         timestamps: true

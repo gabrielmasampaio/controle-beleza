@@ -5,7 +5,7 @@ const productService = require('../services/product.service');
  */
 async function createProduct(req, res) {
     try {
-        const { name, description, price, storage, image, categories, brand } = req.body;
+        const { name, description, price, storage, image, categories, brands, availability } = req.body;
 
         const product = await productService.createProduct({
             name,
@@ -14,7 +14,8 @@ async function createProduct(req, res) {
             storage,
             image,
             categories,
-            brand,
+            brands,
+            availability,
         });
 
         return res.status(201).json(product);

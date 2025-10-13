@@ -9,9 +9,27 @@ async function createCategory(data) {
     }
 }
 
-async function getAllCategories() {
+async function getAllCategories(filters, page = 1, limit = 20) {
     try {
-        return await Category.find();
+        const query = {};
+        const options = {
+            skip: (page - 1) * limit,
+            limit: limit,
+        };
+
+        if (filters.searchTerm) {
+            query.name = { $regex: filters.searchTerm, $options: 'i' };
+        }
+
+        const categories = await Category.find(query, null, options);
+        const totalCategories = await Category.countDocuments(query);
+
+        return {
+            categories,
+            totalCategories,
+            page,
+            pages: Math.ceil(totalCategories / limit)
+        };
     } catch (error) {
         throw new Error('Erro ao buscar categorias: ' + error.message);
     }

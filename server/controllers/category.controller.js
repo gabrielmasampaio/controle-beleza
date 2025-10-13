@@ -14,8 +14,9 @@ async function createCategory(req, res) {
 
 async function getAllCategories(req, res) {
     try {
-        const categories = await categoryService.getAllCategories();
-        return res.status(200).json(categories);
+        const { page, limit, searchTerm } = req.query;
+        const categoriesData = await categoryService.getAllCategories({ searchTerm }, parseInt(page), parseInt(limit));
+        return res.status(200).json(categoriesData);
     } catch (error) {
         console.error('Erro ao buscar categorias:', error);
         return res.status(500).json({ message: error.message });

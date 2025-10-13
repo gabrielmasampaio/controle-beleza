@@ -6,6 +6,6 @@ export type Product = {
     storage: number;
     images?: string[];
     categories?: string[]; // Array of category IDs
-    brand?: string; // Brand ID
-    disponibilidade?: string;
+    brands?: string[]; // Array of brand IDs
+    availability?: string;
 };

@@ -1,15 +1,11 @@
 'use client';
 
-import React, {useEffect} from "react";
+import React from "react";
 import {
     Button,
     Input,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
     Pagination,
+    Spinner,
     Table,
     TableBody,
     TableCell,
@@ -25,6 +21,9 @@ import {SearchIcon} from "@/components/icons";
 import {createCategory, deleteCategory, getCategories, updateCategory} from "@/app/lib/api/category.api";
 import toast from "react-hot-toast";
 import {ConfirmationModal} from "@/components/ConfirmationModal";
+import useSWR from "swr";
+import {getKeyValue} from "@heroui/react";
+import {CategoryFormModal} from "@/components/CategoryFormModal";
 
 interface CategoryTableProps {
     className?: string;
@@ -38,37 +37,54 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
     const [linkedProductsCount, setLinkedProductsCount] = React.useState<number>(0);
     const {isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose} = useDisclosure();
 
-    const [categories, setCategories] = React.useState<Category[]>([]);
     const [page, setPage] = React.useState(1);
-    const rowsPerPage = 8;
-    const pages = Math.ceil(categories.length / rowsPerPage);
     const [searchTerm, setSearchTerm] = React.useState("");
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
 
-    const filteredItems = React.useMemo(() => {
-        return categories.filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [categories, searchTerm]);
+    const {data, isLoading, mutate} = useSWR(
+        `getCategories?page=${page}&searchTerm=${searchTerm}`,
+        () => getCategories(page, 8, searchTerm),
+        {keepPreviousData: true}
+    );
 
-    const pageCategories = React.useMemo(() => {
-        const start = (page - 1) * rowsPerPage;
-        return filteredItems.slice(start, start + rowsPerPage);
-    }, [page, filteredItems]);
+    const pages = React.useMemo(() => {
+        return data?.pages ? data.pages : 0;
+    }, [data?.pages]);
 
-    useEffect(() => {
-        async function fetchCategories() {
-            try {
-                const fetchedCategories = await getCategories();
-                setCategories(fetchedCategories);
-                setPage(1);
-            } catch (err) {
-                console.error("Erro ao buscar categorias:", err);
-            }
+    const loadingState = isLoading || data === undefined ? "loading" : "idle";
+
+    const renderCell = (category: Category, columnKey: React.Key) => {
+        const cellValue = category[columnKey as keyof Category];
+
+        switch (columnKey) {
+            case "name":
+                return cellValue;
+            case "actions":
+                return (
+                    <div className="flex items-center justify-center gap-4">
+                        <Tooltip content="Editar Categoria">
+                            <span
+                                className="text-lg cursor-pointer active:opacity-50"
+                                onClick={() => handleOpenCategory(category)}
+                            >
+                                <EditIcon/>
+                            </span>
+                        </Tooltip>
+
+                        <Tooltip color="danger" content="Remover Categoria">
+                            <span
+                                onClick={() => handleDeleteClick(category)}
+                                className="text-lg text-red-500 cursor-pointer active:opacity-50"
+                            >
+                                <DeleteIcon/>
+                            </span>
+                        </Tooltip>
+                    </div>
+                );
+            default:
+                return cellValue;
         }
-
-        fetchCategories();
-    }, []);
+    };
 
     const handleOpenCategory = (item: Category) => {
         setSelectedItem(item);
@@ -91,10 +107,9 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
     const handleConfirmDelete = async () => {
         if (!categoryToDelete?._id) return;
         try {
-            // Always pass forceDelete=true when confirming deletion
             await deleteCategory(categoryToDelete._id, true);
-            toast.success("Categoria removida"); // Simplified toast message
-            setCategories((prev) => prev.filter((i) => i._id !== categoryToDelete._id));
+            toast.success("Categoria removida");
+            mutate();
             onConfirmClose();
             setCategoryToDelete(null);
             setLinkedProductsCount(0);
@@ -110,19 +125,9 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
                 ? await updateCategory(category)
                 : await createCategory(category);
             toast.success("Categoria salva com sucesso");
-            setCategories((prev) => {
-                const index = prev.findIndex((item) => item._id === saved._id);
-                setHighlightedId(saved._id ?? null);
-                setTimeout(() => setHighlightedId(null), 3000);
-
-                if (index !== -1) {
-                    const updated = [...prev];
-                    updated[index] = saved;
-                    return updated;
-                } else {
-                    return [saved, ...prev];
-                }
-            });
+            mutate();
+            setHighlightedId(saved._id ?? null);
+            setTimeout(() => setHighlightedId(null), 3000);
             onOpenChange();
         } catch (err) {
             console.error("Erro ao salvar categoria", err);
@@ -140,7 +145,7 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
                     label="Buscar"
                     value={searchTerm}
                     startContent={<SearchIcon size={5}/>}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onValueChange={setSearchTerm}
                     onClear={() => setSearchTerm("")}
                 />
                 <Button
@@ -158,9 +163,8 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
 
             <Table
                 aria-label="Tabela de categorias"
-                className="w-full table-fixed"
                 bottomContent={
-                    pages > 1 && (
+                    pages > 0 ? (
                         <div className="flex w-full justify-center">
                             <Pagination
                                 isCompact
@@ -172,49 +176,25 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
                                 onChange={setPage}
                             />
                         </div>
-                    )
+                    ) : null
                 }
             >
                 <TableHeader>
-                    <TableColumn className="w-1/2 text-xs sm:text-base">Nome</TableColumn>
-                    <TableColumn className="w-1/2 text-xs sm:text-base">Ações</TableColumn>
+                    <TableColumn key="name">Nome</TableColumn>
+                    <TableColumn key="actions">Ações</TableColumn>
                 </TableHeader>
-
-                <TableBody emptyContent={"Nenhuma categoria encontrada."}>
-                    {pageCategories.map((category) => (
-                        <TableRow
-                            key={category._id}
-                            className={
-                                category._id === highlightedId ? "text-warning transition duration-75" : ""
-                            }
-                        >
-                            <TableCell className="flex items-center gap-1 text-xs sm:text-base">
-                                {category.name}
-                            </TableCell>
-
-                            <TableCell className="text-xs sm:text-base">
-                                <div className="flex items-center justify-center gap-4">
-                                    <Tooltip content="Editar Categoria">
-                                        <span
-                                            className="text-lg cursor-pointer active:opacity-50"
-                                            onClick={() => handleOpenCategory(category)}
-                                        >
-                                            <EditIcon/>
-                                        </span>
-                                    </Tooltip>
-
-                                    <Tooltip color="danger" content="Remover Categoria">
-                                        <span
-                                            onClick={() => handleDeleteClick(category)}
-                                            className="text-lg text-red-500 cursor-pointer active:opacity-50"
-                                        >
-                                            <DeleteIcon/>
-                                        </span>
-                                    </Tooltip>
-                                </div>
-                            </TableCell>
+                <TableBody
+                    items={data?.categories ?? []}
+                    loadingContent={<Spinner/>}
+                    loadingState={loadingState}
+                >
+                    {(item) => (
+                        <TableRow key={item?._id} className={item?._id === highlightedId ? "text-warning transition duration-75" : ""}>
+                            {(columnKey) => (
+                                <TableCell>{renderCell(item, columnKey)}</TableCell>
+                            )}
                         </TableRow>
-                    ))}
+                    )}
                 </TableBody>
             </Table>
 
@@ -239,50 +219,3 @@ export default function CategoryTable({className = ""}: CategoryTableProps) {
         </div>
     );
 }
-
-interface CategoryFormModalProps {
-    isOpen: boolean;
-    onOpenChange: () => void;
-    category?: Category;
-    onSave: (category: Category) => void;
-}
-
-const CategoryFormModal: React.FC<CategoryFormModalProps> = ({isOpen, onOpenChange, category, onSave}) => {
-    const [name, setName] = React.useState(category?.name || "");
-
-    React.useEffect(() => {
-        setName(category?.name || "");
-    }, [category]);
-
-    const handleSave = () => {
-        onSave({...category, name});
-        onOpenChange();
-    };
-
-    return (
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="sm">
-            <ModalContent>
-                {(onClose) => (
-                    <>
-                        <ModalHeader>{category ? "Editar Categoria" : "Nova Categoria"}</ModalHeader>
-                        <ModalBody>
-                            <Input
-                                label="Nome"
-                                value={name}
-                                onValueChange={setName}
-                            />
-                        </ModalBody>
-                        <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onClose}>
-                                Cancelar
-                            </Button>
-                            <Button color="primary" onPress={handleSave}>
-                                Salvar
-                            </Button>
-                        </ModalFooter>
-                    </>
-                )}
-            </ModalContent>
-        </Modal>
-    );
-};

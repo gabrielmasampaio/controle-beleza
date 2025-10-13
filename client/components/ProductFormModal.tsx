@@ -9,7 +9,12 @@ import {
     ModalHeader,
     Button,
     Input,
+    Select,
+    SelectItem,
 } from "@heroui/react";
+import useSWR from "swr";
+import {getBrands} from "@/app/lib/api/brand.api";
+import {getCategories} from "@/app/lib/api/category.api";
 import {Product} from "@/types";
 import {ProductModal} from "@/components/productModal";
 import {createProduct, updateProduct} from "@/app/lib/api/product.api";
@@ -40,9 +45,17 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         price: 0,
         storage: 0,
         images: [],
+        brands: [],
+        categories: [],
+        availability: "A pronta entrega",
     };
 
     const [form, setForm] = React.useState<Product>(product ?? defaultProduct);
+
+    const {data: brandsResponse} = useSWR("brands", getBrands);
+    const { data: categoriesResponse } = useSWR("categories", getCategories);
+
+    const availabilityOptions = ["A pronta entrega", "A Caminho", "Somente Encomenda"];
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
@@ -197,6 +210,45 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         isStorageInvalid && "Estoque deve ser um número inteiro positivo"
                                     }
                                 />
+
+                                <Select
+                                    label="Marcas"
+                                    selectionMode="multiple"
+                                    selectedKeys={form.brands}
+                                    onSelectionChange={(keys) => handleChange("brands", Array.from(keys).map(String))}
+                                >
+                                    {brandsResponse?.brands?.map((brand) => (
+                                        <SelectItem key={brand._id} >
+                                            {brand.name}
+                                        </SelectItem>
+                                    )) ?? []}
+                                </Select>
+
+                                <Select
+                                    label="Categorias"
+                                    selectionMode="multiple"
+                                    selectedKeys={form.categories}
+                                    onSelectionChange={(keys) => handleChange("categories", Array.from(keys).map(String))}
+                                >
+                                    {categoriesResponse?.categories?.map((category) => (
+                                        <SelectItem key={category._id} >
+                                            {category.name}
+                                        </SelectItem>
+                                    )) ?? []}
+                                </Select>
+
+                                <Select
+                                    label="Disponibilidade"
+                                    // selectedKeys={[form.availability].filter(Boolean)}
+                                    onSelectionChange={(keys) => handleChange("availability", Array.from(keys)[0] as string)}
+                                >
+                                    {availabilityOptions.map((option) => (
+                                        <SelectItem key={option} >
+                                            {option}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+
 
                                 <div className="flex flex-col gap-2">
                                     <label className="text-sm font-medium text-default-600">

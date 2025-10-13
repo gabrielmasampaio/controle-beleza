@@ -14,8 +14,9 @@ async function createBrand(req, res) {
 
 async function getAllBrands(req, res) {
     try {
-        const brands = await brandService.getAllBrands();
-        return res.status(200).json(brands);
+        const { page, limit, searchTerm } = req.query;
+        const brandsData = await brandService.getAllBrands({ searchTerm }, parseInt(page), parseInt(limit));
+        return res.status(200).json(brandsData);
     } catch (error) {
         console.error('Erro ao buscar marcas:', error);
         return res.status(500).json({ message: error.message });

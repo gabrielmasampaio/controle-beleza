@@ -9,9 +9,27 @@ async function createBrand(data) {
     }
 }
 
-async function getAllBrands() {
+async function getAllBrands(filters, page = 1, limit = 20) {
     try {
-        return await Brand.find();
+        const query = {};
+        const options = {
+            skip: (page - 1) * limit,
+            limit: limit,
+        };
+
+        if (filters.searchTerm) {
+            query.name = { $regex: filters.searchTerm, $options: 'i' };
+        }
+
+        const brands = await Brand.find(query, null, options);
+        const totalBrands = await Brand.countDocuments(query);
+
+        return {
+            brands,
+            totalBrands,
+            page,
+            pages: Math.ceil(totalBrands / limit)
+        };
     } catch (error) {
         throw new Error('Erro ao buscar marcas: ' + error.message);
     }
