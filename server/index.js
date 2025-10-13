@@ -21,7 +21,8 @@ const {
     DB_PASS,
     DB_HOST,
     DB_NAME,
-    DB_OPTIONS
+    DB_OPTIONS,
+    PORT
 } = process.env;
 
 const MONGO_URI = `mongodb+srv://${DB_USER}:${DB_PASS}@${DB_HOST}/${DB_NAME}${DB_OPTIONS}`;
@@ -31,7 +32,7 @@ mongoose.connect(MONGO_URI)
     .then(() => {
         console.log(`✅ Conected succesfully to DB`);
         const PORT = 5000;
-        app.listen(PORT, () => {
+        app.listen(PORT || 5000, () => {
             console.log(`🚀 Server online`);
         });
     })

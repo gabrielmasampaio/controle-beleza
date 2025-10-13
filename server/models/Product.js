@@ -4,7 +4,7 @@ const productSchema = new mongoose.Schema({
         name: { type: String, required: true },
         description: String,
         price: { type: Number, required: true },
-        stock: { type: Number, required: true },
+        storage: { type: Number, required: true },
         images: [String], // array of base64 strings
         categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
         brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },

@@ -3,7 +3,7 @@ export type Product = {
     name: string;
     description: string;
     price: number;
-    stock: number;
+    storage: number;
     images?: string[];
     categories?: string[]; // Array of category IDs
     brand?: string; // Brand ID

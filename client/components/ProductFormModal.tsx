@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import {
     validatePrice,
     validateProductName,
-    validateStock,
+    validateStorage,
 } from "@/app/lib/text-format";
 
 interface ProductFormModalProps {
@@ -38,7 +38,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         name: "",
         description: "",
         price: 0,
-        stock: 0,
+        storage: 0,
         images: [],
     };
 
@@ -81,9 +81,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         return !validatePrice(form.price.toString());
     }, [form.price]);
 
-    const isStockInvalid = React.useMemo(() => {
-        return !validateStock(form.stock.toString());
-    }, [form.stock]);
+    const isStorageInvalid = React.useMemo(() => {
+        return !validateStorage(form.storage.toString());
+    }, [form.storage]);
 
     function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
@@ -186,15 +186,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 <Input
                                     label="Estoque"
                                     type="number"
-                                    value={form.stock.toString()}
+                                    value={form.storage.toString()}
                                     placeholder="Quantidade em estoque"
                                     onValueChange={(val) =>
-                                        handleChange("stock", parseInt(val))
+                                        handleChange("storage", parseInt(val))
                                     }
-                                    isInvalid={isStockInvalid}
-                                    color={isStockInvalid ? "danger" : "default"}
+                                    isInvalid={isStorageInvalid}
+                                    color={isStorageInvalid ? "danger" : "default"}
                                     errorMessage={
-                                        isStockInvalid && "Estoque deve ser um número inteiro positivo"
+                                        isStorageInvalid && "Estoque deve ser um número inteiro positivo"
                                     }
                                 />
 

@@ -83,10 +83,10 @@ async function getAllProducts(filters, page = 1, limit = 20) {
             if (filters.maxPrice) query.price.$lte = parseFloat(filters.maxPrice);
         }
 
-        if (filters.minStock || filters.maxStock) {
-            query.stock = {};
-            if (filters.minStock) query.stock.$gte = parseInt(filters.minStock);
-            if (filters.maxStock) query.stock.$lte = parseInt(filters.maxStock);
+        if (filters.minStorage || filters.maxStorage) {
+            query.storage = {};
+            if (filters.minStorage) query.storage.$gte = parseInt(filters.minStorage);
+            if (filters.maxStorage) query.storage.$lte = parseInt(filters.maxStorage);
         }
 
         if (filters.category) {

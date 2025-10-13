@@ -195,7 +195,7 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                 <TableHeader>
                     <TableColumn key="name">Produto</TableColumn>
                     <TableColumn key="price">Preço</TableColumn>
-                    <TableColumn key="stock">Estoque</TableColumn>
+                    <TableColumn key="storage">Estoque</TableColumn>
                     <TableColumn key="actions">Ações</TableColumn>
                 </TableHeader>
                 <TableBody

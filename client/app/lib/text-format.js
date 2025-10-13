@@ -21,7 +21,7 @@ export function validatePrice(value) {
   return !isNaN(price) && price >= 0;
 }
 
-export function validateStock(value) {
-  const stock = parseInt(value);
-  return !isNaN(stock) && stock >= 0;
+export function validateStorage(value) {
+  const storage = parseInt(value);
+  return !isNaN(storage) && storage >= 0;
 }
