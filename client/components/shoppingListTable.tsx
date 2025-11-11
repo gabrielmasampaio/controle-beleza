@@ -27,7 +27,7 @@ interface ShoppingListTableProps {
 }
 
 export default function ShoppingListTable({ items, addQuantityToItem, removeItem }: ShoppingListTableProps) {
-    const [selectedItem, setSelectedItem] = React.useState(items[0]);
+    const [selectedItem, setSelectedItem] = React.useState<ShoppingItem | null>(items[0] ?? null);
     const {
         isOpen: isProductOpen,
         onOpen: onProductOpen,
@@ -39,6 +39,20 @@ export default function ShoppingListTable({ items, addQuantityToItem, removeItem
         onOpen: onRemoveItemOpen,
         onOpenChange: onRemoveItemOpenChange,
     } = useDisclosure();
+
+    React.useEffect(() => {
+        if (!items.length) {
+            setSelectedItem(null);
+            return;
+        }
+
+        setSelectedItem((prev) => {
+            if (prev && items.some((item) => item._id === prev._id)) {
+                return prev;
+            }
+            return items[0];
+        });
+    }, [items]);
 
     const noItemsInList = () => (
         <>
@@ -141,16 +155,25 @@ export default function ShoppingListTable({ items, addQuantityToItem, removeItem
                     ))}
                 </TableBody>
             </Table>
-            <ProductModal hideFooter={true} product={selectedItem} isOpen={isProductOpen} onOpenChange={onProductOpenChange} />
-            <RemoveItemModal
-                isOpen={isRemoveItemOpen}
-                item={selectedItem}
-                onOpenChange={onRemoveItemOpenChange}
-                onConfirmRemoval={(itemId: string) => {
-                    toast.error("Produto removido da lista!");
-                    removeItem(itemId);
-                }}
-            />
+            {selectedItem && (
+                <ProductModal
+                    hideFooter={true}
+                    product={selectedItem}
+                    isOpen={isProductOpen}
+                    onOpenChange={onProductOpenChange}
+                />
+            )}
+            {selectedItem && (
+                <RemoveItemModal
+                    isOpen={isRemoveItemOpen}
+                    item={selectedItem}
+                    onOpenChange={onRemoveItemOpenChange}
+                    onConfirmRemoval={(itemId: string) => {
+                        toast.error("Produto removido da lista!");
+                        removeItem(itemId);
+                    }}
+                />
+            )}
         </div>
     );
 }

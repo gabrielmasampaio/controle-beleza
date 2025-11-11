@@ -26,12 +26,15 @@ import {
     validateStorage,
 } from "@/app/lib/text-format";
 
+type Reference<T> = T | string;
+type MaybeRefs<T> = Reference<T>[] | undefined;
+
 const defaultProduct: Product = {
-    _id: undefined,
-    name: "",
-    description: "",
-    price: 0,
-    storage: 0,
+	_id: undefined,
+	name: "",
+	description: "",
+	price: 0,
+	storage: 0,
     images: [],
     brands: [],
     categories: [],
@@ -45,24 +48,39 @@ interface ProductFormModalProps {
     onSave: (item: Product) => void;
 }
 
+const toIdArray = <T extends { _id?: string }>(values?: MaybeRefs<T>) =>
+	(values ?? [])
+		.map((entry) => {
+			if (typeof entry === "string") return entry;
+			return entry?._id ?? "";
+		})
+		.filter(Boolean);
+
+const sanitizeProduct = (input?: Product): Product => ({
+	...defaultProduct,
+	...input,
+	brands: toIdArray(input?.brands),
+	categories: toIdArray(input?.categories),
+});
+
 export const ProductFormModal: React.FC<ProductFormModalProps> = ({
-                                                                      isOpen,
-                                                                      onOpenChange,
-                                                                      product,
-                                                                      onSave,
-                                                                  }) => {
-    const [form, setForm] = React.useState<Product>(product ?? { ...defaultProduct });
+	isOpen,
+	onOpenChange,
+	product,
+	onSave,
+}) => {
+	const [form, setForm] = React.useState<Product>(sanitizeProduct(product));
 
     const {data: brands} = useSWR("brands", getBrands);
-    const { data: categories } = useSWR("categories", getCategories);
+	const { data: categories } = useSWR("categories", getCategories);
 
     const availabilityOptions = ["A pronta entrega", "A Caminho", "Somente Encomenda"];
 
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
-    React.useEffect(() => {
-        setForm(product ?? { ...defaultProduct });
-    }, [product]);
+	React.useEffect(() => {
+		setForm(sanitizeProduct(product));
+	}, [product]);
 
     const handleChange = (field: keyof Product, value: any) => {
         setForm((prev) => ({
@@ -216,12 +234,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     }
                                 />
 
-                                <Select
-                                    label="Marcas"
-                                    selectionMode="multiple"
-                                    selectedKeys={form.brands}
-                                    onSelectionChange={(keys) => handleChange("brands", Array.from(keys).map(String))}
-                                >
+								<Select
+									label="Marcas"
+									selectionMode="multiple"
+									selectedKeys={toIdArray(form.brands)}
+									onSelectionChange={(keys) => handleChange("brands", Array.from(keys).map(String))}
+								>
                                     {brands?.map((brand) => (
                                         <SelectItem key={brand._id} >
                                             {brand.name}
@@ -229,12 +247,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     )) ?? []}
                                 </Select>
 
-                                <Select
-                                    label="Categorias"
-                                    selectionMode="multiple"
-                                    selectedKeys={form.categories}
-                                    onSelectionChange={(keys) => handleChange("categories", Array.from(keys).map(String))}
-                                >
+								<Select
+									label="Categorias"
+									selectionMode="multiple"
+									selectedKeys={toIdArray(form.categories)}
+									onSelectionChange={(keys) => handleChange("categories", Array.from(keys).map(String))}
+								>
                                     {categories?.map((category) => (
                                         <SelectItem key={category._id} >
                                             {category.name}
