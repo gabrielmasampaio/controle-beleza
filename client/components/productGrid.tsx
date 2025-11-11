@@ -1,190 +1,381 @@
-'use client'
-import React, {useCallback, useEffect} from "react";
+'use client';
+
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
-    Card,
-    CardBody,
-    CardFooter,
-    Image,
-    Input,
-    Pagination,
-    Select,
-    SelectItem,
-    Spinner,
-    useDisclosure,
+	Button,
+	Card,
+	CardBody,
+	CardFooter,
+	Image,
+	Input,
+	Pagination,
+	Select,
+	SelectItem,
+	Spinner,
+	Tooltip,
+	useDisclosure,
 } from "@heroui/react";
-import {formatPrice} from "@/app/lib/text-format";
-import {ProductModal} from "@/components/productModal";
-import {Product} from "@/types";
-import {SearchIcon} from "@/components/icons";
-import {getProducts} from "@/app/lib/api/product.api";
-import {DEFAULT_IMAGE} from "@/app/lib/constants";
+import clsx from "clsx";
+import useSWR from "swr";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatPrice } from "@/app/lib/text-format";
+import { ProductModal } from "@/components/productModal";
+import { Product } from "@/types";
+import type { Category, Brand } from "@/types";
+import { SearchIcon } from "@/components/icons";
+import { getProducts } from "@/app/lib/api/product.api";
+import { getCategories } from "@/app/lib/api/category.api";
+import { getBrands } from "@/app/lib/api/brand.api";
+import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 type SortKey = "default" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
 
 const sortOptions: { key: SortKey; value: string }[] = [
-    {key: "default", value: "Padrão"},
-    {key: "price-asc", value: "Preço: Menor → Maior"},
-    {key: "price-desc", value: "Preço: Maior → Menor"},
-    {key: "name-asc", value: "Nome: A → Z"},
-    {key: "name-desc", value: "Nome: Z → A"},
+	{ key: "default", value: "Padrão" },
+	{ key: "price-asc", value: "Preço: Menor → Maior" },
+	{ key: "price-desc", value: "Preço: Maior → Menor" },
+	{ key: "name-asc", value: "Nome: A → Z" },
+	{ key: "name-desc", value: "Nome: Z → A" },
 ];
 
+const getEntityId = (entity: string | { _id?: string } | undefined) =>
+	typeof entity === "string" ? entity : entity?._id ?? "";
+
+type FilterSectionProps<T extends { _id?: string; name: string }> = {
+	title: string;
+	options: T[];
+	selected: string[];
+	onToggle: (id: string) => void;
+};
+
+const FilterSection = <T extends { _id?: string; name: string }>({
+	title,
+	options,
+	selected,
+	onToggle,
+}: FilterSectionProps<T>) => {
+	if (!options.length) {
+		return null;
+	}
+
+	return (
+		<section className="space-y-2">
+			<h3 className="text-sm font-semibold text-default-600">{title}</h3>
+			<ul className="space-y-1 max-h-48 overflow-y-auto pr-1">
+				{options.map((option) => {
+					const id = option._id ?? option.name;
+					const inputId = `${title}-${id}`;
+					const isChecked = selected.includes(id);
+
+					return (
+						<li key={id}>
+							<label htmlFor={inputId} className="flex items-center gap-2 text-sm text-default-600">
+								<input
+									id={inputId}
+									type="checkbox"
+									checked={isChecked}
+									onChange={() => onToggle(id)}
+									className="h-4 w-4 accent-primary"
+								/>
+								<span>{option.name}</span>
+							</label>
+						</li>
+					);
+				})}
+			</ul>
+		</section>
+	);
+};
+
 export default function ProductGrid() {
-    const [products, setProducts] = React.useState<Product[]>([]);
-    const [loading, setLoading] = React.useState(true);
-    const [page, setPage] = React.useState(1);
-    const [totalPages, setTotalPages] = React.useState(1);
-    const [selectedItem, setSelectedItem] = React.useState<Product>();
-    const {isOpen, onOpen, onOpenChange} = useDisclosure();
-    const [searchTerm, setSearchTerm] = React.useState("");
-    const [sortKey, setSortKey] = React.useState<SortKey>("default");
+	const [products, setProducts] = React.useState<Product[]>([]);
+	const [loading, setLoading] = React.useState(true);
+	const [page, setPage] = React.useState(1);
+	const [totalPages, setTotalPages] = React.useState(1);
+	const [selectedItem, setSelectedItem] = React.useState<Product>();
+	const { isOpen, onOpen, onOpenChange } = useDisclosure();
+	const [searchTerm, setSearchTerm] = React.useState("");
+	const [sortKey, setSortKey] = React.useState<SortKey>("default");
+	const [itemsPerPage, setItemsPerPage] = React.useState(25);
 
-    const [itemsPerPage, setItemsPerPage] = React.useState(25);
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
-    const fetchItems = useCallback(async () => {
-        setLoading(true);
-        try {
-            const productsResponse = await getProducts(page, itemsPerPage, searchTerm);
-            console.log(productsResponse)
-            setProducts(productsResponse.products);
-            setTotalPages(productsResponse.pages);
-        } catch (err) {
-            console.error("Erro ao carregar produtos:", err);
-        } finally {
-            setLoading(false);
-        }
-    }, [page, itemsPerPage, searchTerm]);
+	const selectedCategories = searchParams.getAll("category");
+	const selectedBrands = searchParams.getAll("brand");
+	const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0;
 
-    useEffect(() => {
-        fetchItems();
-    }, [fetchItems]);
+	const { data: categoriesData } = useSWR<Category[]>("catalog-categories", getCategories);
+	const { data: brandsData } = useSWR<Brand[]>("catalog-brands", getBrands);
 
-    const filteredItems = React.useMemo(() => {
-        let sorted = [...products].filter((item) =>
-            item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+	const sortedCategories = useMemo(
+		() => [...(categoriesData ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+		[categoriesData]
+	);
+	const sortedBrands = useMemo(
+		() => [...(brandsData ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
+		[brandsData]
+	);
 
-        switch (sortKey) {
-            case "price-asc":
-                sorted.sort((a, b) => a.price - b.price);
-                break;
-            case "price-desc":
-                sorted.sort((a, b) => b.price - a.price);
-                break;
-            case "name-asc":
-                sorted.sort((a, b) => a.name.localeCompare(b.name));
-                break;
-            case "name-desc":
-                sorted.sort((a, b) => b.name.localeCompare(a.name));
-                break;
-        }
+	const updateQueryParams = useCallback(
+		(key: "category" | "brand", value: string) => {
+			const params = new URLSearchParams(searchParams.toString());
+			const currentValues = params.getAll(key);
+			const nextValues = currentValues.includes(value)
+				? currentValues.filter((entry) => entry !== value)
+				: [...currentValues, value];
 
-        return sorted;
-    }, [products, searchTerm, sortKey]);
+			params.delete(key);
+			nextValues.forEach((entry) => params.append(key, entry));
 
+			const queryString = params.toString();
+			router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
+			setPage(1);
+		},
+		[pathname, router, searchParams]
+	);
 
-    const handleOpen = (item: Product) => {
-        setSelectedItem(item);
-        onOpen();
-    };
+	const clearFilters = useCallback(() => {
+		const params = new URLSearchParams(searchParams.toString());
+		params.delete("category");
+		params.delete("brand");
+		const queryString = params.toString();
+		router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
+		setPage(1);
+	}, [pathname, router, searchParams]);
 
-    const handleSortChange = (keys: any) => {
-        const key = Array.from(keys)[0] as SortKey;
-        setSortKey(key);
-    };
+	const fetchItems = useCallback(async () => {
+		setLoading(true);
+		try {
+			const productsResponse = await getProducts(page, itemsPerPage, searchTerm);
+			setProducts(productsResponse.products);
+			setTotalPages(productsResponse.pages);
+		} catch (err) {
+			console.error("Erro ao carregar produtos:", err);
+		} finally {
+			setLoading(false);
+		}
+	}, [page, itemsPerPage, searchTerm]);
 
+	useEffect(() => {
+		fetchItems();
+	}, [fetchItems]);
 
-    return (
-        <>
-            <div className="flex flex-col sm:flex-row justify-center items-center mb-5 mt-10 gap-4">
-                <Input
-                    size="sm"
-                    isClearable
-                    label="Buscar"
-                    value={searchTerm}
-                    startContent={<SearchIcon size={5}/>}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onClear={() => setSearchTerm("")}
-                />
-                <Select
-                    size="sm"
-                    className="max-w-[200px]"
-                    label="Ordenar"
-                    defaultSelectedKeys={["default"]}
-                    onSelectionChange={handleSortChange}
-                >
-                    {sortOptions.map((option) => (
-                        <SelectItem key={option.key}>{option.value}</SelectItem>
-                    ))}
-                </Select>
-                <Select
-                    size="sm"
-                    className="max-w-[150px]"
-                    label="Itens por página"
-                    defaultSelectedKeys={[itemsPerPage.toString()]}
-                    onSelectionChange={(keys) => {
-                        const newItemsPerPage = Number(Array.from(keys)[0]);
-                        setItemsPerPage(newItemsPerPage);
-                        setPage(1);
-                    }}
-                >
-                    <SelectItem key="25">25</SelectItem>
-                    <SelectItem key="50">50</SelectItem>
-                    <SelectItem key="100">100</SelectItem>
-                </Select>
-            </div>
-            <div id="grid" className="gap-4 grid grid-cols-2 sm:grid-cols-4">
-                {loading ? (
-                    <div className="col-span-full flex justify-center items-center h-[200px]">
-                        <Spinner size="lg" color="secondary"/>
-                    </div>
-                ) : (
-                    products.length === 0 && !loading ? (
-                        <div className="col-span-full text-center text-default-500 text-sm">
-                            Nenhum produto encontrado.
-                        </div>
-                    ) : (
-                        products.map((product, index) => (
-                            <Card shadow="sm" key={product._id ?? index} isPressable
-                                  onPress={() => handleOpen(product)}>
-                                {product.images && (<CardBody className="overflow-visible p-0">
-                                    <Image
-                                        shadow="sm"
-                                        radius="lg"
-                                        width="100%"
-                                        alt={product.name}
-                                        className="w-full object-cover h-[180px]"
-                                        src={product.images[0]?.trim() || DEFAULT_IMAGE}
-                                    />
-                                </CardBody>)}
-                                <CardFooter className="text-small justify-between flex flex-col">
-                                    <b>{product.name}</b>
-                                    <p className="text-default-500 whitespace-nowrap">{formatPrice(product.price)}</p>
-                                </CardFooter>
-                            </Card>
-                        ))
-                    )
-                )
-                }
-            </div>
-            <div className="flex justify-center mt-6 gap-4">
-                {products.length > 0 &&
-                    <Pagination
-                        isCompact
-                        showControls
-                        showShadow
-                        color="primary"
-                        page={page}
-                        total={totalPages}
-                        onChange={(page) => {
-                            const grid = document.getElementById("grid");
-                            if (grid) grid.scrollIntoView({behavior: "smooth"});
-                            setPage(page);
-                        }}
-                    />
-                }
-            </div>
-            {selectedItem && <ProductModal product={selectedItem} isOpen={isOpen} onOpenChange={onOpenChange}/>}
-        </>
-    );
+	const filteredItems = useMemo(() => {
+		const normalizeSearch = searchTerm.trim().toLowerCase();
+
+		const filterCollection = (collection?: (string | { _id?: string })[]) =>
+			(collection ?? [])
+				.map((item) => getEntityId(item))
+				.filter(Boolean);
+
+		const filterBySelection = (selected: string[], available: string[]) =>
+			selected.length === 0 || selected.some((entry) => available.includes(entry));
+
+		const filtered = products.filter((item) => {
+			const matchesSearch =
+				normalizeSearch.length === 0 ||
+				item.name.toLowerCase().includes(normalizeSearch) ||
+				item.description?.toLowerCase().includes(normalizeSearch);
+
+			const matchesCategory = filterBySelection(selectedCategories, filterCollection(item.categories));
+			const matchesBrand = filterBySelection(selectedBrands, filterCollection(item.brands));
+
+			return matchesSearch && matchesCategory && matchesBrand;
+		});
+
+		switch (sortKey) {
+			case "price-asc":
+				return filtered.sort((a, b) => a.price - b.price);
+			case "price-desc":
+				return filtered.sort((a, b) => b.price - a.price);
+			case "name-asc":
+				return filtered.sort((a, b) => a.name.localeCompare(b.name));
+			case "name-desc":
+				return filtered.sort((a, b) => b.name.localeCompare(a.name));
+			default:
+				return filtered;
+		}
+	}, [products, searchTerm, sortKey, selectedBrands, selectedCategories]);
+
+	const handleOpen = (item: Product) => {
+		setSelectedItem(item);
+		onOpen();
+	};
+
+	const handleSortChange = (keys: any) => {
+		const key = Array.from(keys)[0] as SortKey;
+		setSortKey(key);
+	};
+
+	return (
+		<>
+			<div className="mt-10 flex flex-col gap-8 lg:flex-row">
+				<aside className="w-full rounded-2xl border border-default-200 bg-white/60 p-4 shadow-sm lg:max-w-xs">
+					<div className="flex items-center justify-between">
+						<p className="text-base font-semibold text-default-900">Filtros</p>
+						<Button
+							variant="light"
+							size="sm"
+							onPress={clearFilters}
+							isDisabled={!hasActiveFilters}
+						>
+							Limpar
+						</Button>
+					</div>
+					<div className="mt-4 space-y-6">
+						<FilterSection
+							title="Categorias"
+							options={sortedCategories}
+							selected={selectedCategories}
+							onToggle={(id) => updateQueryParams("category", id)}
+						/>
+						<FilterSection
+							title="Marcas"
+							options={sortedBrands}
+							selected={selectedBrands}
+							onToggle={(id) => updateQueryParams("brand", id)}
+						/>
+						{!sortedCategories.length && !sortedBrands.length && (
+							<p className="text-sm text-default-400">Nenhum filtro disponível no momento.</p>
+						)}
+					</div>
+				</aside>
+
+				<div className="flex-1">
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+						<Input
+							size="sm"
+							isClearable
+							label="Buscar"
+							value={searchTerm}
+							className="sm:max-w-xs"
+							startContent={<SearchIcon size={5} />}
+							onChange={(e) => {
+								setSearchTerm(e.target.value);
+								setPage(1);
+							}}
+							onClear={() => {
+								setSearchTerm("");
+								setPage(1);
+							}}
+						/>
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+							<Select
+								size="sm"
+								className="sm:w-48"
+								label="Ordenar"
+								selectedKeys={[sortKey]}
+								onSelectionChange={handleSortChange}
+							>
+								{sortOptions.map((option) => (
+									<SelectItem key={option.key}>{option.value}</SelectItem>
+								))}
+							</Select>
+							<Select
+								size="sm"
+								className="sm:w-36"
+								label="Itens por página"
+								selectedKeys={[itemsPerPage.toString()]}
+								onSelectionChange={(keys) => {
+									const newItemsPerPage = Number(Array.from(keys)[0]);
+									setItemsPerPage(newItemsPerPage);
+									setPage(1);
+								}}
+							>
+								<SelectItem key="12">12</SelectItem>
+								<SelectItem key="25">25</SelectItem>
+								<SelectItem key="50">50</SelectItem>
+							</Select>
+						</div>
+					</div>
+
+					<div id="grid" className="mt-6 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{loading ? (
+							<div className="col-span-full flex h-48 items-center justify-center">
+								<Spinner size="lg" color="secondary" />
+							</div>
+						) : filteredItems.length === 0 ? (
+							<div className="col-span-full text-center text-default-500">
+								Nenhum produto encontrado para os filtros selecionados.
+							</div>
+						) : (
+							filteredItems.map((product, index) => {
+								const imageSrc = product.images?.[0]?.trim() || DEFAULT_IMAGE;
+								const isOutOfStock = (product.storage ?? 0) <= 0;
+
+								const cardContent = (
+									<Card
+										shadow="sm"
+										key={product._id ?? index}
+										isPressable
+										onPress={() => handleOpen(product)}
+										className={clsx(
+											"transition hover:-translate-y-1",
+											isOutOfStock && "border-danger-200 bg-default-100 opacity-80"
+										)}
+									>
+										<CardBody className="overflow-hidden p-0">
+											<Image
+												shadow="sm"
+												width="100%"
+												alt={product.name}
+												className={clsx(
+													"h-[220px] w-full object-cover transition",
+													isOutOfStock && "grayscale opacity-75"
+												)}
+												src={imageSrc}
+											/>
+										</CardBody>
+										<CardFooter className="flex flex-col items-start gap-1">
+											<div className="flex w-full items-center justify-between">
+												<b className="line-clamp-2 text-left">{product.name}</b>
+												{isOutOfStock && (
+													<span className="text-xs font-semibold uppercase text-danger">Esgotado</span>
+												)}
+											</div>
+											<p className="text-lg font-semibold text-primary">{formatPrice(product.price)}</p>
+											{!isOutOfStock && (
+												<p className="text-xs text-default-500">Estoque: {product.storage}</p>
+											)}
+										</CardFooter>
+									</Card>
+								);
+
+								return isOutOfStock ? (
+									<Tooltip key={product._id ?? index} content="Produto esgotado">
+										{cardContent}
+									</Tooltip>
+								) : (
+									cardContent
+								);
+							})
+						)}
+					</div>
+
+					{filteredItems.length > 0 && totalPages > 1 && (
+						<div className="mt-6 flex justify-center">
+							<Pagination
+								isCompact
+								showControls
+								showShadow
+								color="primary"
+								page={page}
+								total={totalPages}
+								onChange={(nextPage) => {
+									const grid = document.getElementById("grid");
+									if (grid) grid.scrollIntoView({ behavior: "smooth" });
+									setPage(nextPage);
+								}}
+							/>
+						</div>
+					)}
+				</div>
+			</div>
+			{selectedItem && (
+				<ProductModal product={selectedItem} isOpen={isOpen} onOpenChange={onOpenChange} />
+			)}
+		</>
+	);
 }

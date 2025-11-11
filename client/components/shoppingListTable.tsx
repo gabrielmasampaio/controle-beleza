@@ -46,7 +46,7 @@ export default function ShoppingListTable({ items, addQuantityToItem, removeItem
             <p>
                 Ir para o
                 <Link
-                    href="/catalogue"
+                    href="/"
                     className={
                         buttonStyles({
                             color: "primary",
