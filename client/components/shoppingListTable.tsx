@@ -17,6 +17,7 @@ import { ShoppingItem } from "@/types";
 import { ProductModal } from "@/components/productModal";
 import { RemoveItemModal } from "@/components/RemoveItemModal";
 import { formatPrice } from "@/app/lib/text-format";
+import { DEFAULT_IMAGE } from "@/app/lib/constants";
 import toast from "react-hot-toast";
 
 interface ShoppingListTableProps {
@@ -93,7 +94,7 @@ export default function ShoppingListTable({ items, addQuantityToItem, removeItem
                                 >
                                     <User
                                         className="hover:opacity-50"
-                                        avatarProps={{ radius: "lg", src: item.image }}
+                                        avatarProps={{ radius: "lg", src: item.images?.[0]?.trim() || DEFAULT_IMAGE }}
                                         name={item.name}
                                     >
                                         {item.name}

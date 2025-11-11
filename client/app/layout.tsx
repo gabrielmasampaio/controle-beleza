@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
 import { Metadata } from "next";
 import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/navbar";
 import { Link } from "@heroui/react";
@@ -30,11 +29,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head ><title> Revenda Online </title></head>
 			<body
 				className={clsx(
 					"min-h-screen bg-background bg-scroll font-sans antialiased",
-					fontSans.variable,
 					"bg-pink-radial",
 				)}
 			>

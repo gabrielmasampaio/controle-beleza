@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect} from "react";
+import React, {useCallback, useEffect} from "react";
 import {
     Card,
     CardBody,
@@ -41,11 +41,7 @@ export default function ProductGrid() {
 
     const [itemsPerPage, setItemsPerPage] = React.useState(25);
 
-    useEffect(() => {
-        fetchItems();
-    }, [page, searchTerm, itemsPerPage]);
-
-    const fetchItems = async () => {
+    const fetchItems = useCallback(async () => {
         setLoading(true);
         try {
             const productsResponse = await getProducts(page, itemsPerPage, searchTerm);
@@ -56,9 +52,12 @@ export default function ProductGrid() {
             console.error("Erro ao carregar produtos:", err);
         } finally {
             setLoading(false);
-            setLoading(false);
         }
-    }
+    }, [page, itemsPerPage, searchTerm]);
+
+    useEffect(() => {
+        fetchItems();
+    }, [fetchItems]);
 
     const filteredItems = React.useMemo(() => {
         let sorted = [...products].filter((item) =>

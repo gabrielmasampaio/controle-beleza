@@ -1,6 +1,7 @@
 'use client';
 
 import React from "react";
+import NextImage from "next/image";
 import {
     Modal,
     ModalBody,
@@ -25,6 +26,18 @@ import {
     validateStorage,
 } from "@/app/lib/text-format";
 
+const defaultProduct: Product = {
+    _id: undefined,
+    name: "",
+    description: "",
+    price: 0,
+    storage: 0,
+    images: [],
+    brands: [],
+    categories: [],
+    availability: "A pronta entrega",
+};
+
 interface ProductFormModalProps {
     isOpen: boolean;
     onOpenChange: () => void;
@@ -38,19 +51,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                                                       product,
                                                                       onSave,
                                                                   }) => {
-    const defaultProduct: Product = {
-        _id: undefined,
-        name: "",
-        description: "",
-        price: 0,
-        storage: 0,
-        images: [],
-        brands: [],
-        categories: [],
-        availability: "A pronta entrega",
-    };
-
-    const [form, setForm] = React.useState<Product>(product ?? defaultProduct);
+    const [form, setForm] = React.useState<Product>(product ?? { ...defaultProduct });
 
     const {data: brands} = useSWR("brands", getBrands);
     const { data: categories } = useSWR("categories", getCategories);
@@ -60,7 +61,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     const [previewOpen, setPreviewOpen] = React.useState(false);
 
     React.useEffect(() => {
-        setForm(product ?? defaultProduct);
+        setForm(product ?? { ...defaultProduct });
     }, [product]);
 
     const handleChange = (field: keyof Product, value: any) => {
@@ -77,7 +78,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 ? await updateProduct(form)
                 : await createProduct(form);
             toast.success("Produto salvo com sucesso");
-            setForm(defaultProduct)
+            setForm({ ...defaultProduct })
             onSave(saved);
             onOpenChange();
         } catch (err) {
@@ -100,49 +101,52 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }, [form.storage]);
 
     function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0];
-        if (!file) return;
+        const files = Array.from(event.target.files ?? []);
+        if (!files.length || typeof window === "undefined") return;
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
+        files.forEach((file) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
 
-        reader.onload = () => {
-            const img = new Image();
-            img.src = reader.result as string;
+            reader.onload = () => {
+                const imgElement = document.createElement("img");
+                imgElement.src = reader.result as string;
 
-            img.onload = () => {
-                // Ajusta resolução com base na largura da tela: se mobile, usar menor dimensão
-                const isMobile = window.innerWidth < 768;
-                const MAX_WIDTH = isMobile ? 600 : 800;
-                const MAX_HEIGHT = isMobile ? 600 : 800;
+                imgElement.onload = () => {
+                    const isMobile = window.innerWidth < 768;
+                    const MAX_WIDTH = isMobile ? 600 : 800;
+                    const MAX_HEIGHT = isMobile ? 600 : 800;
 
-                let width = img.width;
-                let height = img.height;
+                    let { width, height } = imgElement;
 
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height = (height * MAX_WIDTH) / width;
-                        width = MAX_WIDTH;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = (height * MAX_WIDTH) / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = (width * MAX_HEIGHT) / height;
+                            height = MAX_HEIGHT;
+                        }
                     }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width = (width * MAX_HEIGHT) / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
 
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
 
-                const ctx = canvas.getContext("2d");
-                ctx?.drawImage(img, 0, 0, width, height);
+                    const ctx = canvas.getContext("2d");
+                    ctx?.drawImage(imgElement, 0, 0, width, height);
 
-                const quality = file.size > 2097152 ? 0.5 : 0.7;
-                const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
-                setForm((prev) => ({...prev, images: [...(prev.images ?? []), compressedBase64]}));
+                    const quality = file.size > 2097152 ? 0.5 : 0.7;
+                    const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+                    setForm((prev) => ({
+                        ...prev,
+                        images: [...(prev.images ?? []), compressedBase64],
+                    }));
+                };
             };
-        };
+        });
     }
 
     const removeImage = (index: number) => {
@@ -267,6 +271,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                             id="image-upload"
                                             type="file"
                                             accept="image/*"
+                                            multiple
                                             onChange={handleImageUpload}
                                             className="hidden"
                                         />
@@ -275,10 +280,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     {form.images && form.images.length > 0 && (
                                         form.images.map((image, index) => (
                                             <div key={index} className="flex flex-col items-start gap-2">
-                                                <img
+                                                <NextImage
                                                     src={image}
                                                     alt="Prévia da imagem"
+                                                    width={150}
+                                                    height={150}
                                                     className="rounded-md mt-2 w-full max-w-[150px] h-auto border object-cover"
+                                                    unoptimized
                                                 />
                                                 <Button
                                                     size="sm"
