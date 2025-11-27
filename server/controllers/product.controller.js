@@ -5,7 +5,7 @@ const productService = require('../services/product.service');
  */
 async function createProduct(req, res) {
     try {
-        const { name, description, price, storage, image, categories, brands, availability } = req.body;
+        const { name, description, price, storage, image, categories, availability } = req.body;
 
         const product = await productService.createProduct({
             name,
@@ -14,7 +14,6 @@ async function createProduct(req, res) {
             storage,
             image,
             categories,
-            brands,
             availability,
         });
 
@@ -46,8 +45,8 @@ async function updateProduct(req, res) {
  */
 async function getProducts(req, res) {
     try {
-        const { page, limit, searchTerm, ...filters } = req.query;
-        const productsData = await productService.getAllProducts(filters, parseInt(page), parseInt(limit));
+        const { page, limit, searchTerm, sortColumn, sortDirection, ...filters } = req.query;
+        const productsData = await productService.getAllProducts(filters, parseInt(page), parseInt(limit), sortColumn, sortDirection);
         return res.status(200).json(productsData);
     } catch (error) {
         console.error('Erro ao buscar produtos:', error);

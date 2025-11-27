@@ -14,18 +14,17 @@ import {
 	Spinner,
 	Tooltip,
 	useDisclosure,
+	Popover, PopoverTrigger, PopoverContent
 } from "@heroui/react";
 import clsx from "clsx";
 import useSWR from "swr";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatPrice } from "@/app/lib/text-format";
 import { ProductModal } from "@/components/productModal";
-import { Product } from "@/types";
-import type { Category, Brand } from "@/types";
-import { SearchIcon } from "@/components/icons";
+import { Product, Category } from "@/types";
 import { getProducts } from "@/app/lib/api/product.api";
+import { SearchIcon } from "@/components/icons";
 import { getCategories } from "@/app/lib/api/category.api";
-import { getBrands } from "@/app/lib/api/brand.api";
 import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
 type SortKey = "default" | "price-asc" | "price-desc" | "name-asc" | "name-desc";
@@ -38,6 +37,12 @@ const sortOptions: { key: SortKey; value: string }[] = [
 	{ key: "name-desc", value: "Nome: Z → A" },
 ];
 
+const availabilityOptions = [
+	{ _id: "A pronta entrega", name: "A pronta entrega" },
+	{ _id: "A Caminho", name: "A Caminho" },
+	{ _id: "Somente Encomenda", name: "Somente Encomenda" },
+];
+
 const getEntityId = (entity: string | { _id?: string } | undefined) =>
 	typeof entity === "string" ? entity : entity?._id ?? "";
 
@@ -48,12 +53,12 @@ type FilterSectionProps<T extends { _id?: string; name: string }> = {
 	onToggle: (id: string) => void;
 };
 
-const FilterSection = <T extends { _id?: string; name: string }>({
+const FilterSection = React.memo(function FilterSection<T extends { _id?: string; name: string }>({
 	title,
 	options,
 	selected,
 	onToggle,
-}: FilterSectionProps<T>) => {
+}: FilterSectionProps<T>) {
 	if (!options.length) {
 		return null;
 	}
@@ -85,7 +90,65 @@ const FilterSection = <T extends { _id?: string; name: string }>({
 			</ul>
 		</section>
 	);
-};
+});
+
+type FilterPopoverContentProps = {
+    titleProps: any;
+    close: () => void;
+    clearFilters: () => void;
+    hasActiveFilters: boolean;
+    sortedCategories: Category[];
+    selectedCategories: string[];
+    updateQueryParams: (key: "category" | "availability", value: string) => void;
+    availabilityOptions: { _id: string; name: string }[];
+    selectedAvailability: string[];
+}
+
+const FilterPopoverContent = React.memo(function FilterPopoverContent({
+    titleProps,
+    close,
+    clearFilters,
+    hasActiveFilters,
+    sortedCategories,
+    selectedCategories,
+    updateQueryParams,
+    availabilityOptions,
+    selectedAvailability,
+}: FilterPopoverContentProps) {
+    return (
+        <div className="w-full rounded-2xl border border-default-200 bg-white/60 p-4 shadow-sm lg:max-w-xs">
+            <div className="flex items-center justify-between">
+                <p className="text-base font-semibold text-default-900" {...titleProps}>Filtros</p>
+                <Button
+                    variant="light"
+                    size="sm"
+                    onPress={clearFilters}
+                    isDisabled={!hasActiveFilters}
+                >
+                    Limpar
+                </Button>
+            </div>
+            <div className="mt-4 space-y-6">
+                <FilterSection
+                    title="Categorias"
+                    options={sortedCategories}
+                    selected={selectedCategories}
+                    onToggle={(id) => updateQueryParams("category", id)}
+                />
+                <FilterSection
+                    title="Disponibilidade"
+                    options={availabilityOptions}
+                    selected={selectedAvailability}
+                    onToggle={(id) => updateQueryParams("availability", id)}
+                />
+                {!sortedCategories.length && !availabilityOptions.length && (
+                    <p className="text-sm text-default-400">Nenhum filtro disponível no momento.</p>
+                )}
+                <Button color="primary" onPress={close}>Aplicar Filtros</Button>
+            </div>
+        </div>
+    );
+});
 
 export default function ProductGrid() {
 	const [products, setProducts] = React.useState<Product[]>([]);
@@ -93,7 +156,7 @@ export default function ProductGrid() {
 	const [page, setPage] = React.useState(1);
 	const [totalPages, setTotalPages] = React.useState(1);
 	const [selectedItem, setSelectedItem] = React.useState<Product>();
-	const { isOpen, onOpen, onOpenChange } = useDisclosure();
+	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const [sortKey, setSortKey] = React.useState<SortKey>("default");
 	const [itemsPerPage, setItemsPerPage] = React.useState(25);
@@ -102,24 +165,19 @@ export default function ProductGrid() {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
-	const selectedCategories = searchParams.getAll("category");
-	const selectedBrands = searchParams.getAll("brand");
-	const hasActiveFilters = selectedCategories.length > 0 || selectedBrands.length > 0;
+	const selectedCategories = useMemo(() => searchParams.getAll("category"), [searchParams]);
+	const selectedAvailability = useMemo(() => searchParams.getAll("availability"), [searchParams]);
+	const hasActiveFilters = selectedCategories.length > 0 || selectedAvailability.length > 0;
 
 	const { data: categoriesData } = useSWR<Category[]>("catalog-categories", getCategories);
-	const { data: brandsData } = useSWR<Brand[]>("catalog-brands", getBrands);
 
 	const sortedCategories = useMemo(
 		() => [...(categoriesData ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
 		[categoriesData]
 	);
-	const sortedBrands = useMemo(
-		() => [...(brandsData ?? [])].sort((a, b) => a.name.localeCompare(b.name)),
-		[brandsData]
-	);
 
 	const updateQueryParams = useCallback(
-		(key: "category" | "brand", value: string) => {
+		(key: "category" | "availability", value: string) => {
 			const params = new URLSearchParams(searchParams.toString());
 			const currentValues = params.getAll(key);
 			const nextValues = currentValues.includes(value)
@@ -139,7 +197,7 @@ export default function ProductGrid() {
 	const clearFilters = useCallback(() => {
 		const params = new URLSearchParams(searchParams.toString());
 		params.delete("category");
-		params.delete("brand");
+		params.delete("availability");
 		const queryString = params.toString();
 		router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false });
 		setPage(1);
@@ -148,7 +206,7 @@ export default function ProductGrid() {
 	const fetchItems = useCallback(async () => {
 		setLoading(true);
 		try {
-			const productsResponse = await getProducts(page, itemsPerPage, searchTerm);
+			const productsResponse = await getProducts(page, itemsPerPage, searchTerm, selectedCategories, selectedAvailability);
 			setProducts(productsResponse.products);
 			setTotalPages(productsResponse.pages);
 		} catch (err) {
@@ -156,7 +214,7 @@ export default function ProductGrid() {
 		} finally {
 			setLoading(false);
 		}
-	}, [page, itemsPerPage, searchTerm]);
+	}, [page, itemsPerPage, searchTerm, selectedCategories, selectedAvailability]);
 
 	useEffect(() => {
 		fetchItems();
@@ -180,10 +238,26 @@ export default function ProductGrid() {
 				item.description?.toLowerCase().includes(normalizeSearch);
 
 			const matchesCategory = filterBySelection(selectedCategories, filterCollection(item.categories));
-			const matchesBrand = filterBySelection(selectedBrands, filterCollection(item.brands));
+			const matchesAvailability = selectedAvailability.length === 0 || selectedAvailability.includes(item.availability ?? "");
 
-			return matchesSearch && matchesCategory && matchesBrand;
+			return matchesSearch && matchesCategory && matchesAvailability;
 		});
+
+		const availabilityOrder = (item: Product) => {
+			if ((item.storage ?? 0) <= 0) {
+				return 4;
+			}
+			switch (item.availability) {
+				case "A pronta entrega":
+					return 1;
+				case "A Caminho":
+					return 2;
+				case "Somente Encomenda":
+					return 3;
+				default:
+					return 4;
+			}
+		};
 
 		switch (sortKey) {
 			case "price-asc":
@@ -197,7 +271,7 @@ export default function ProductGrid() {
 			default:
 				return filtered;
 		}
-	}, [products, searchTerm, sortKey, selectedBrands, selectedCategories]);
+	}, [products, searchTerm, sortKey, selectedCategories, selectedAvailability]);
 
 	const handleOpen = (item: Product) => {
 		setSelectedItem(item);
@@ -212,55 +286,45 @@ export default function ProductGrid() {
 	return (
 		<>
 			<div className="mt-10 flex flex-col gap-8 lg:flex-row">
-				<aside className="w-full rounded-2xl border border-default-200 bg-white/60 p-4 shadow-sm lg:max-w-xs">
-					<div className="flex items-center justify-between">
-						<p className="text-base font-semibold text-default-900">Filtros</p>
-						<Button
-							variant="light"
-							size="sm"
-							onPress={clearFilters}
-							isDisabled={!hasActiveFilters}
-						>
-							Limpar
-						</Button>
-					</div>
-					<div className="mt-4 space-y-6">
-						<FilterSection
-							title="Categorias"
-							options={sortedCategories}
-							selected={selectedCategories}
-							onToggle={(id) => updateQueryParams("category", id)}
-						/>
-						<FilterSection
-							title="Marcas"
-							options={sortedBrands}
-							selected={selectedBrands}
-							onToggle={(id) => updateQueryParams("brand", id)}
-						/>
-						{!sortedCategories.length && !sortedBrands.length && (
-							<p className="text-sm text-default-400">Nenhum filtro disponível no momento.</p>
-						)}
-					</div>
-				</aside>
-
 				<div className="flex-1">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<Input
-							size="sm"
-							isClearable
-							label="Buscar"
-							value={searchTerm}
-							className="sm:max-w-xs"
-							startContent={<SearchIcon size={5} />}
-							onChange={(e) => {
-								setSearchTerm(e.target.value);
-								setPage(1);
-							}}
-							onClear={() => {
-								setSearchTerm("");
-								setPage(1);
-							}}
-						/>
+						<div className="flex gap-2">
+							<Input
+								size="sm"
+								isClearable
+								label="Buscar"
+								value={searchTerm}
+								className="sm:max-w-xs"
+								startContent={<SearchIcon size={5}/>}
+								onChange={(e) => {
+									setSearchTerm(e.target.value);
+									setPage(1);
+								}}
+								onClear={() => {
+									setSearchTerm("");
+									setPage(1);
+								}}
+							/>
+							<Popover placement="bottom-start">
+								<PopoverTrigger>
+									<Button color="secondary" variant="flat" className="min-w-fit">Filtros</Button>
+								</PopoverTrigger>
+																			<PopoverContent>
+																				{(titleProps) => (
+																					<FilterPopoverContent
+																						titleProps={titleProps}
+																						close={onClose}
+																						clearFilters={clearFilters}
+																						hasActiveFilters={hasActiveFilters}
+																						sortedCategories={sortedCategories}
+																						selectedCategories={selectedCategories}
+																						updateQueryParams={updateQueryParams}
+																						availabilityOptions={availabilityOptions}
+																						selectedAvailability={selectedAvailability}
+																					/>
+																				)}
+																			</PopoverContent>							</Popover>
+						</div>
 						<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 							<Select
 								size="sm"

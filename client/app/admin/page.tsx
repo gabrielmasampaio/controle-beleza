@@ -3,7 +3,6 @@
 import LoginCard from "@/components/loginCard";
 import AdminTable from "@/components/adminTable";
 import CategoryTable from "@/components/CategoryTable";
-import BrandTable from "@/components/BrandTable";
 import {title} from "@/components/primitives";
 import React, {useEffect, useState} from "react";
 import {Spinner, Tabs, Tab} from "@heroui/react";
@@ -49,9 +48,6 @@ export default function AdminPage() {
 							</Tab>
 							<Tab key="categories" title="Categorias">
 								<CategoryTable className={"mt-7"} />
-							</Tab>
-							<Tab key="brands" title="Marcas">
-								<BrandTable className={"mt-7"} />
 							</Tab>
 						</Tabs>
 					</div>

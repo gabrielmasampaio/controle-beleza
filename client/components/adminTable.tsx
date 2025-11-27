@@ -21,7 +21,7 @@ import {formatPrice} from "@/app/lib/text-format";
 import {ProductFormModal} from "@/components/ProductFormModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
 import {SearchIcon} from "@/components/icons";
-import {deleteProduct, getProducts} from "@/app/lib/api/product.api";
+import {deleteProduct, getProducts, updateProduct} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
@@ -41,10 +41,12 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
     const [page, setPage] = React.useState(1);
     const [itemsPerPage, setItemsPerPage] = React.useState(10);
     const [searchTerm, setSearchTerm] = React.useState("");
+    const [sortColumn, setSortColumn] = React.useState("name");
+    const [sortDirection, setSortDirection] = React.useState("ascending");
 
     const {data, isLoading, mutate} = useSWR(
-        `getProducts?page=${page}&limit=${itemsPerPage}&searchTerm=${searchTerm}`,
-        () => getProducts(page, itemsPerPage, searchTerm),
+        `getProducts?page=${page}&limit=${itemsPerPage}&searchTerm=${searchTerm}&sortColumn=${sortColumn}&sortDirection=${sortDirection}`,
+        () => getProducts(page, itemsPerPage, searchTerm, [], [], sortColumn, sortDirection),
         {keepPreviousData: true}
     );
 
@@ -55,6 +57,17 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
     const loadingState = isLoading || data === undefined ? "loading" : "idle";
 
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
+
+    const updateProductStorage = async (productId: string, newStorage: number) => {
+        try {
+            await updateProduct({_id: productId, storage: newStorage});
+            toast.success("Estoque atualizado com sucesso");
+            mutate();
+        } catch (error) {
+            console.error("Erro ao atualizar estoque:", error);
+            toast.error("Erro ao atualizar estoque");
+        }
+    };
 
     const renderCell = (product: Product, columnKey: React.Key) => {
         const cellValue = product[columnKey as keyof Product];
@@ -72,7 +85,7 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                         }
                     >
                         <User
-                            className="hover:opacity-50"
+                            className={`hover:opacity-50 ${product.storage <= 0 ? 'text-red-500' : ''}`}
                             avatarProps={{
                                 radius: "lg",
                                 src: product.images && product.images.length > 0 ? product.images[0] : "",
@@ -105,6 +118,16 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                         </span>
                         </Tooltip>
                     </div>
+                );
+            case "storage":
+                return (
+                    <Input
+                        type="number"
+                        value={cellValue?.toString()}
+                        onValueChange={(val) => updateProductStorage(product._id!, parseInt(val))}
+                        className="max-w-[100px]"
+                        size="sm"
+                    />
                 );
             default:
                 return cellValue as string;
@@ -177,28 +200,36 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
             <div className="overflow-x-auto">
                 <Table
                     aria-label="Tabela de produtos"
-                bottomContent={
-                    pages > 0 ? (
-                        <div className="flex w-full justify-center">
-                            <Pagination
-                                isCompact
-                                showControls
-                                showShadow
-                                color="secondary"
-                                page={page}
-                                total={pages}
-                                onChange={(p) => setPage(p)}
-                            />
-                        </div>
-                    ) : null
-                }
-            >
-                <TableHeader>
-                    <TableColumn key="name">Produto</TableColumn>
-                    <TableColumn key="price">Preço</TableColumn>
-                    <TableColumn key="storage">Estoque</TableColumn>
-                    <TableColumn key="actions">Ações</TableColumn>
-                </TableHeader>
+                    sortDescriptor={{
+                        column: sortColumn,
+                        direction: sortDirection === "ascending" ? "ascending" : "descending"
+                    }}
+                    onSortChange={(descriptor) => {
+                        setSortColumn(descriptor.column as string);
+                        setSortDirection(descriptor.direction === "ascending" ? "ascending" : "descending");
+                    }}
+                    bottomContent={
+                        pages > 0 ? (
+                            <div className="flex w-full justify-center">
+                                <Pagination
+                                    isCompact
+                                    showControls
+                                    showShadow
+                                    color="secondary"
+                                    page={page}
+                                    total={pages}
+                                    onChange={(p) => setPage(p)}
+                                />
+                            </div>
+                        ) : null
+                    }
+                >
+                    <TableHeader>
+                        <TableColumn key="name" allowsSorting>Produto</TableColumn>
+                        <TableColumn key="price" allowsSorting>Preço</TableColumn>
+                        <TableColumn key="storage" allowsSorting>Estoque</TableColumn>
+                        <TableColumn key="actions">Ações</TableColumn>
+                    </TableHeader>
                 <TableBody
                     items={data?.products ?? []}
                     loadingContent={<Spinner/>}

@@ -1,5 +1,4 @@
 import type { Category } from "./category";
-import type { Brand } from "./brand";
 
 type Reference<T> = T | string;
 
@@ -11,6 +10,5 @@ export type Product = {
     storage: number;
     images?: string[];
     categories?: Reference<Category>[];
-    brands?: Reference<Brand>[];
     availability?: string;
 };

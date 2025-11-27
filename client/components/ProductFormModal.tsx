@@ -12,9 +12,9 @@ import {
     Input,
     Select,
     SelectItem,
+    CheckboxGroup, Checkbox
 } from "@heroui/react";
 import useSWR from "swr";
-import {getBrands} from "@/app/lib/api/brand.api";
 import {getCategories} from "@/app/lib/api/category.api";
 import {Product} from "@/types";
 import {ProductModal} from "@/components/productModal";
@@ -36,7 +36,6 @@ const defaultProduct: Product = {
 	price: 0,
 	storage: 0,
     images: [],
-    brands: [],
     categories: [],
     availability: "A pronta entrega",
 };
@@ -59,7 +58,6 @@ const toIdArray = <T extends { _id?: string }>(values?: MaybeRefs<T>) =>
 const sanitizeProduct = (input?: Product): Product => ({
 	...defaultProduct,
 	...input,
-	brands: toIdArray(input?.brands),
 	categories: toIdArray(input?.categories),
 });
 
@@ -71,7 +69,6 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 }) => {
 	const [form, setForm] = React.useState<Product>(sanitizeProduct(product));
 
-    const {data: brands} = useSWR("brands", getBrands);
 	const { data: categories } = useSWR("categories", getCategories);
 
     const availabilityOptions = ["A pronta entrega", "A Caminho", "Somente Encomenda"];
@@ -81,6 +78,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 	React.useEffect(() => {
 		setForm(sanitizeProduct(product));
 	}, [product]);
+
+    React.useEffect(() => {
+        if (form.storage <= 0 && form.availability !== "Somente Encomenda") {
+            setForm((prev) => ({ ...prev, availability: "Somente Encomenda" }));
+        }
+    }, [form.storage, form.availability]);
 
     const handleChange = (field: keyof Product, value: any) => {
         setForm((prev) => ({
@@ -234,43 +237,34 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     }
                                 />
 
-								<Select
-									label="Marcas"
-									selectionMode="multiple"
-									selectedKeys={toIdArray(form.brands)}
-									onSelectionChange={(keys) => handleChange("brands", Array.from(keys).map(String))}
-								>
-                                    {brands?.map((brand) => (
-                                        <SelectItem key={brand._id} >
-                                            {brand.name}
-                                        </SelectItem>
-                                    )) ?? []}
-                                </Select>
-
-								<Select
+								<CheckboxGroup
 									label="Categorias"
-									selectionMode="multiple"
-									selectedKeys={toIdArray(form.categories)}
-									onSelectionChange={(keys) => handleChange("categories", Array.from(keys).map(String))}
+									value={toIdArray(form.categories)}
+									onValueChange={(values) => handleChange("categories", values)}
 								>
                                     {categories?.map((category) => (
-                                        <SelectItem key={category._id} >
+                                        <Checkbox key={category._id} value={category._id ?? ""} >
                                             {category.name}
-                                        </SelectItem>
+                                        </Checkbox>
                                     )) ?? []}
-                                </Select>
+                                </CheckboxGroup>
 
-                                <Select
+                                <CheckboxGroup
                                     label="Disponibilidade"
-                                    // selectedKeys={[form.availability].filter(Boolean)}
-                                    onSelectionChange={(keys) => handleChange("availability", Array.from(keys)[0] as string)}
+                                    value={[form.availability].filter(Boolean) as string[]}
+                                    onValueChange={(values) => handleChange("availability", values[0] || "")}
+                                    isDisabled={form.storage <= 0}
                                 >
                                     {availabilityOptions.map((option) => (
-                                        <SelectItem key={option} >
+                                        <Checkbox
+                                            key={option}
+                                            value={option}
+                                            isDisabled={form.storage <= 0 && option !== "Somente Encomenda"}
+                                        >
                                             {option}
-                                        </SelectItem>
+                                        </Checkbox>
                                     ))}
-                                </Select>
+                                </CheckboxGroup>
 
 
                                 <div className="flex flex-col gap-2">

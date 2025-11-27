@@ -17,7 +17,7 @@ import clsx from "clsx";
 import React from "react";
 import { formatPrice } from "@/app/lib/text-format";
 import { useShoppingList } from "@/app/lib/localStorage/shopping-list/useShoppingList";
-import { buildWhatsappUrl } from "@/app/lib/whatsapp/whatsapp";
+import { createWhatsAppLink } from "@/app/lib/whatsapp/whatsapp";
 import toast from "react-hot-toast";
 import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
@@ -158,7 +158,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
 	const handleWhatsapp = () => {
 		if (outOfStock) return;
-		const url = buildWhatsappUrl([{ ...product, quantity }]);
+		const url = createWhatsAppLink([{ ...product, quantity }]);
 		window.open(url, "_blank");
 	};
 

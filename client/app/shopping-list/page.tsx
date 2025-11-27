@@ -5,7 +5,7 @@ import {useShoppingList} from "@/app/lib/localStorage/shopping-list/useShoppingL
 import ShoppingListTable from "@/components/shoppingListTable";
 import {Card, CardBody, Code, button as buttonStyles, Link} from "@heroui/react";
 import {formatPrice} from "@/app/lib/text-format";
-import {buildWhatsappUrl} from "@/app/lib/whatsapp/whatsapp";
+import {createWhatsAppLink} from "@/app/lib/whatsapp/whatsapp";
 
 export default function ShoppingListPage() {
     const {items, updateQuantity, removeItem, sumListValue} = useShoppingList();
@@ -33,7 +33,7 @@ export default function ShoppingListPage() {
                 onClick={() => console.log("Criar um metodo aqui que sera colocado dentro da lib para montar a url com os items selecionados para enviar para o whatsapp. usar no href")}
                 className={buttonStyles({color: "secondary", radius: "full", variant: "shadow"})}
                 isExternal={true}
-                href={buildWhatsappUrl(items)}
+                href={createWhatsAppLink(items)}
                 isDisabled={items.length<1}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">

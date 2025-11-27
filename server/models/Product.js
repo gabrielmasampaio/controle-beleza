@@ -7,7 +7,6 @@ const productSchema = new mongoose.Schema({
         storage: { type: Number, required: true },
         images: [String], // array of base64 strings
         categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }],
-        brands: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Brand' }],
         availability: {
             type: String,
             enum: ['A pronta entrega', 'A Caminho', 'Somente Encomenda'],

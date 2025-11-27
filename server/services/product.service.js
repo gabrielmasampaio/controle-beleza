@@ -1,6 +1,5 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category'); // Import Category model
-const Brand = require('../models/Brand'); // Import Brand model
 
 /**
  * Cria um novo produto no banco
@@ -41,14 +40,9 @@ async function updateProductById(id, data) {
 /**
  * Retorna lista de produtos com filtros opcionais, paginação e busca wildcard
  */
-async function getAllProducts(filters, page = 1, limit = 20) {
+async function getAllProducts(filters, page = 1, limit = 20, sortColumn = '', sortDirection = '') {
     try {
         const query = {};
-        const options = {
-            skip: (page - 1) * limit,
-            limit: limit,
-            populate: ['categories', 'brands']
-        };
 
         // Wildcard search
         if (filters.searchTerm) {
@@ -62,12 +56,6 @@ async function getAllProducts(filters, page = 1, limit = 20) {
             const matchingCategories = await Category.find({ name: searchRegex }).select('_id');
             if (matchingCategories.length > 0) {
                 orConditions.push({ categories: { $in: matchingCategories.map(cat => cat._id) } });
-            }
-
-            // Search in brands by name
-            const matchingBrands = await Brand.find({ name: searchRegex }).select('_id');
-            if (matchingBrands.length > 0) {
-                orConditions.push({ brands: { $in: matchingBrands.map(b => b._id) } });
             }
 
             query.$or = orConditions;
@@ -93,15 +81,29 @@ async function getAllProducts(filters, page = 1, limit = 20) {
             query.categories = filters.category; // Filter by category ID
         }
 
-        if (filters.brands) {
-            query.brands = filters.brands; // Filter by brand ID
-        }
-
         if (filters.availability) {
             query.availability = filters.availability;
         }
+        
+        const pipeline = [
+            { $match: query },
+            {
+                $addFields: {
+                    isOutOfStock: { $lte: ["$storage", 0] }
+                }
+            },
+            {
+                $sort: {
+                    isOutOfStock: 1,
+                    ...(sortColumn && { [sortColumn]: sortDirection === 'ascending' ? 1 : -1 })
+                }
+            },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+        ];
 
-        const products = await Product.find(query, null, options);
+        const products = await Product.aggregate(pipeline);
+        await Product.populate(products, { path: "categories" });
         const totalProducts = await Product.countDocuments(query);
 
         return {
@@ -123,8 +125,7 @@ async function getAllProducts(filters, page = 1, limit = 20) {
 async function getProductById(id) {
     try {
         const product = await Product.findById(id)
-            .populate('categories')
-            .populate('brands');
+            .populate('categories');
         if (!product) {
             throw new Error('Produto não encontrado');
         }
@@ -158,9 +159,7 @@ module.exports = {
     getProductById,
     deleteProductById,
     countProductsByCategory,
-    countProductsByBrand,
     removeCategoryFromProducts,
-    removeBrandFromProducts
 };
 
 async function countProductsByCategory(categoryId) {
@@ -168,14 +167,6 @@ async function countProductsByCategory(categoryId) {
         return await Product.countDocuments({ categories: categoryId });
     } catch (error) {
         throw new Error('Erro ao contar produtos por categoria: ' + error.message);
-    }
-}
-
-async function countProductsByBrand(brandId) {
-    try {
-        return await Product.countDocuments({ brands: brandId });
-    } catch (error) {
-        throw new Error('Erro ao contar produtos por marca: ' + error.message);
     }
 }
 
@@ -187,16 +178,5 @@ async function removeCategoryFromProducts(categoryId) {
         );
     } catch (error) {
         throw new Error('Erro ao remover categoria de produtos: ' + error.message);
-    }
-}
-
-async function removeBrandFromProducts(brandId) {
-    try {
-        await Product.updateMany(
-            { brands: brandId },
-            { $pull: { brands: brandId } } // Unset the brand field
-        );
-    } catch (error) {
-        throw new Error('Erro ao remover marca de produtos: ' + error.message);
     }
 }

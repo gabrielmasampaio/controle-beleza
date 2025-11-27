@@ -10,12 +10,20 @@ interface GetProductsResponse {
     pages: number;
 }
 
-export async function getProducts(page: number = 1, limit: number = 20, searchTerm: string = ''): Promise<GetProductsResponse> {
+export async function getProducts(page: number = 1, limit: number = 20, searchTerm: string = '', categories: string[] = [], availability: string[] = [], sortColumn: string = '', sortDirection: string = ''): Promise<GetProductsResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append('page', page.toString());
     queryParams.append('limit', limit.toString());
     if (searchTerm) {
         queryParams.append('searchTerm', searchTerm);
+    }
+    categories.forEach(category => queryParams.append('category', category));
+    availability.forEach(avail => queryParams.append('availability', avail));
+    if (sortColumn) {
+        queryParams.append('sortColumn', sortColumn);
+    }
+    if (sortDirection) {
+        queryParams.append('sortDirection', sortDirection);
     }
 
     const res = await fetch(`${API_URL}/product?${queryParams.toString()}`);
@@ -37,7 +45,7 @@ export async function createProduct(product: Product): Promise<Product> {
     return res.json();
 }
 
-export async function updateProduct(product: Product): Promise<Product> {
+export async function updateProduct(product: Partial<Product>): Promise<Product> {
     const token = getToken();
     const res = await fetchWithAuth(`${API_URL}/product/${product._id}`, {
         method: "PUT",
