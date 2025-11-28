@@ -16,14 +16,15 @@ import {
     User,
 } from "@heroui/react";
 import {DeleteIcon, EditIcon, EyeIcon} from "@heroui/shared-icons";
-import {Product} from "@/types";
-import {formatPrice} from "@/app/lib/text-format";
+import {MinusIcon, PlusIcon, SearchIcon} from "@/components/icons";
 import {ProductFormModal} from "@/components/ProductFormModal";
 import {RemoveItemModal} from "@/components/RemoveItemModal";
-import {SearchIcon} from "@/components/icons";
 import {deleteProduct, getProducts, updateProduct} from "@/app/lib/api/product.api";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import {Product} from "@/types";
+import {useDebouncedCallback} from "use-debounce";
+import {formatPrice} from "@/app/lib/text-format";
 
 interface AdminTableProps {
     className?: string;
@@ -58,16 +59,27 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
 
     const [highlightedId, setHighlightedId] = React.useState<string | null>(null);
 
-    const updateProductStorage = async (productId: string, newStorage: number) => {
+    const debouncedUpdateProductStorage = useDebouncedCallback(async (productId: string, newStorage: number) => {
+        if (!data) return;
+        // Create a deep copy of the data object and its products array
+        const optimisticData = {
+            ...data,
+            products: data.products.map(p =>
+                p._id === productId ? { ...p, storage: newStorage } : p
+            )
+        };
+
+        mutate(optimisticData, false); // Update SWR cache immediately, revalidate in background
+
         try {
             await updateProduct({_id: productId, storage: newStorage});
             toast.success("Estoque atualizado com sucesso");
-            mutate();
         } catch (error) {
             console.error("Erro ao atualizar estoque:", error);
             toast.error("Erro ao atualizar estoque");
+            mutate(); // Revalidate to revert to server state on error
         }
-    };
+    }, 1000); // 1-second debounce
 
     const renderCell = (product: Product, columnKey: React.Key) => {
         const cellValue = product[columnKey as keyof Product];
@@ -120,14 +132,27 @@ export default function AdminTable({className = ""}: Readonly<AdminTableProps>) 
                     </div>
                 );
             case "storage":
+                const currentStorage = product.storage ?? 0;
+                const handleIncrement = () => {
+                    const newStorage = currentStorage + 1;
+                    debouncedUpdateProductStorage(product._id!, newStorage);
+                };
+
+                const handleDecrement = () => {
+                    const newStorage = Math.max(0, currentStorage - 1);
+                    debouncedUpdateProductStorage(product._id!, newStorage);
+                };
+
                 return (
-                    <Input
-                        type="number"
-                        value={cellValue?.toString()}
-                        onValueChange={(val) => updateProductStorage(product._id!, parseInt(val))}
-                        className="max-w-[100px]"
-                        size="sm"
-                    />
+                    <div className="flex items-center gap-1">
+                        <Button isIconOnly size="sm" variant="flat" onPress={handleDecrement}>
+                            <MinusIcon size={16} />
+                        </Button>
+                        <span className="w-8 text-center">{currentStorage}</span>
+                        <Button isIconOnly size="sm" variant="flat" onPress={handleIncrement}>
+                            <PlusIcon size={16} />
+                        </Button>
+                    </div>
                 );
             default:
                 return cellValue as string;
