@@ -184,3 +184,80 @@ export const SearchIcon = (props: IconSvgProps) => (
 		/>
 	</svg>
 );
+
+export const FilterIcon = (props: IconSvgProps) => (
+	<svg
+		aria-hidden="true"
+		fill="none"
+		focusable="false"
+		height="1em"
+		role="presentation"
+		viewBox="0 0 24 24"
+		width="1em"
+		{...props}
+	>
+		<path
+			d="M4 21V14"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M4 10V3"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M12 21V12"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M12 8V3"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M20 21V16"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M20 12V3"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M1 14H7"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M9 8H15"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+		<path
+			d="M17 16H23"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+		/>
+	</svg>
+);

@@ -23,7 +23,7 @@ import { formatPrice } from "@/app/lib/text-format";
 import { ProductModal } from "@/components/productModal";
 import { Product, Category } from "@/types";
 import { getProducts } from "@/app/lib/api/product.api";
-import { SearchIcon } from "@/components/icons";
+import { FilterIcon, SearchIcon } from "@/components/icons";
 import { getCategories } from "@/app/lib/api/category.api";
 import { DEFAULT_IMAGE } from "@/app/lib/constants";
 
@@ -116,7 +116,7 @@ const FilterPopoverContent = React.memo(function FilterPopoverContent({
     selectedAvailability,
 }: FilterPopoverContentProps) {
     return (
-        <div className="w-full rounded-2xl border border-default-200 bg-white/60 p-4 shadow-sm lg:max-w-xs">
+        <div className="w-full lg:max-w-xs">
             <div className="flex items-center justify-between">
                 <p className="text-base font-semibold text-default-900" {...titleProps}>Filtros</p>
                 <Button
@@ -221,27 +221,7 @@ export default function ProductGrid() {
 	}, [fetchItems]);
 
 	const filteredItems = useMemo(() => {
-		const normalizeSearch = searchTerm.trim().toLowerCase();
-
-		const filterCollection = (collection?: (string | { _id?: string })[]) =>
-			(collection ?? [])
-				.map((item) => getEntityId(item))
-				.filter(Boolean);
-
-		const filterBySelection = (selected: string[], available: string[]) =>
-			selected.length === 0 || selected.some((entry) => available.includes(entry));
-
-		const filtered = products.filter((item) => {
-			const matchesSearch =
-				normalizeSearch.length === 0 ||
-				item.name.toLowerCase().includes(normalizeSearch) ||
-				item.description?.toLowerCase().includes(normalizeSearch);
-
-			const matchesCategory = filterBySelection(selectedCategories, filterCollection(item.categories));
-			const matchesAvailability = selectedAvailability.length === 0 || selectedAvailability.includes(item.availability ?? "");
-
-			return matchesSearch && matchesCategory && matchesAvailability;
-		});
+		const sortedProducts = [...products];
 
 		const availabilityOrder = (item: Product) => {
 			if ((item.storage ?? 0) <= 0) {
@@ -261,17 +241,17 @@ export default function ProductGrid() {
 
 		switch (sortKey) {
 			case "price-asc":
-				return filtered.sort((a, b) => a.price - b.price);
+				return sortedProducts.sort((a, b) => a.price - b.price);
 			case "price-desc":
-				return filtered.sort((a, b) => b.price - a.price);
+				return sortedProducts.sort((a, b) => b.price - a.price);
 			case "name-asc":
-				return filtered.sort((a, b) => a.name.localeCompare(b.name));
+				return sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
 			case "name-desc":
-				return filtered.sort((a, b) => b.name.localeCompare(a.name));
+				return sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
 			default:
-				return filtered;
+				return sortedProducts;
 		}
-	}, [products, searchTerm, sortKey, selectedCategories, selectedAvailability]);
+	}, [products, sortKey]);
 
 	const handleOpen = (item: Product) => {
 		setSelectedItem(item);
@@ -288,7 +268,7 @@ export default function ProductGrid() {
 			<div className="mt-10 flex flex-col gap-8 lg:flex-row">
 				<div className="flex-1">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-						<div className="flex gap-2">
+						<div className="flex gap-2 items-center">
 							<Input
 								size="sm"
 								isClearable
@@ -307,7 +287,7 @@ export default function ProductGrid() {
 							/>
 							<Popover placement="bottom-start">
 								<PopoverTrigger>
-									<Button color="secondary" variant="flat" className="min-w-fit">Filtros</Button>
+									<Button color="secondary" variant="flat" className="min-w-fit min-h-max h-12" startContent={<FilterIcon size={18} />}>Filtros</Button>
 								</PopoverTrigger>
 																			<PopoverContent>
 																				{(titleProps) => (
